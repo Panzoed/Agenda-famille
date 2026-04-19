@@ -46,12 +46,11 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .legend{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 10px;}
 .leg{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:700;}
 .leg-dot{width:8px;height:8px;border-radius:50%;}
-.month-view{padding:0 16px 16px;}
+.month-view{padding:0 16px 8px;}
 .cal-headers{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
 .cal-hdr{text-align:center;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;padding:6px 0;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
 .cal-day{background:white;border-radius:10px;min-height:72px;padding:4px 3px;cursor:pointer;border:2px solid transparent;position:relative;}
-.cal-day:hover{opacity:0.85;}
 .cal-day.empty{background:transparent;cursor:default;}
 .cal-day.today{outline:2px solid var(--primary);}
 .day-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
@@ -63,6 +62,17 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .dw-fermeture{background:#D1FAE5;color:#065F46;}
 .dw-we{background:#F3F4F6;color:#9CA3AF;}
 .event-item{font-size:7px;font-weight:700;color:#BE185D;background:#FCE7F3;border-radius:3px;padding:1px 3px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.month-events-section{padding:0 16px 16px;}
+.month-events-title{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.month-event-row{background:white;border-radius:12px;padding:10px 14px;margin-bottom:8px;border-left:4px solid var(--primary);display:flex;align-items:flex-start;gap:10px;}
+.mer-date{font-size:11px;font-weight:800;color:var(--primary2);min-width:50px;}
+.mer-info{flex:1;}
+.mer-title{font-size:13px;font-weight:800;}
+.mer-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.mer-work{display:inline-block;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-top:4px;}
+.ferie-row{background:white;border-radius:12px;padding:10px 14px;margin-bottom:8px;border-left:4px solid #DC2626;display:flex;align-items:center;gap:10px;}
+.ferie-date{font-size:11px;font-weight:800;color:#B91C1C;min-width:50px;}
+.ferie-name{font-size:13px;font-weight:800;color:#B91C1C;}
 .week-view{padding:0 16px 16px;}
 .week-day{background:white;border-radius:14px;padding:12px 14px;margin-bottom:8px;}
 .week-day-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
@@ -159,6 +169,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
     </div>
     <div class="cal-grid" id="calGrid"></div>
   </div>
+  <div class="month-events-section" id="monthEventsSection"></div>
   <div class="week-view" id="weekView" style="display:none">
     <div id="weekDays"></div>
   </div>
@@ -203,7 +214,8 @@ let currentUser=null,events=[],curYear=new Date().getFullYear(),curMonth=new Dat
 const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const DAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const TYPE_ICONS={task:'✅',rdv:'📍',family:'👨‍👩‍👧',fun:'🎉',important:'⚠️'};
-const FERIES=new Set(['2026-01-01','2026-04-06','2026-05-01','2026-05-14','2026-05-25','2026-07-21','2026-07-28','2026-08-15','2026-11-01','2026-11-11','2026-12-25','2026-12-31']);
+const FERIE_NAMES={'2026-01-01':'Nouvel An','2026-04-06':'Lundi de Pâques','2026-05-01':'Fête du Travail','2026-05-14':'Ascension','2026-05-25':'Lundi de Pentecôte','2026-07-21':'Fête Nationale','2026-07-28':'Récup. 15/08','2026-08-15':'Assomption','2026-11-01':'Toussaint','2026-11-11':'Armistice','2026-12-25':'Noël','2026-12-31':'Récup. 1/11'};
+const FERIES=new Set(Object.keys(FERIE_NAMES));
 const FERMETURES=new Set();
 for(let d=24;d<=31;d++){if(d===28)continue;const dow=new Date(2026,6,d).getDay();if(dow===0||dow===6)continue;FERMETURES.add('2026-07-'+String(d).padStart(2,'0'));}
 FERMETURES.add('2026-11-02');
@@ -250,6 +262,7 @@ function setView(view){
   document.getElementById('tabMonth').className='vtab'+(view==='month'?' active':'');
   document.getElementById('tabWeek').className='vtab'+(view==='week'?' active':'');
   document.getElementById('monthView').style.display=view==='month'?'block':'none';
+  document.getElementById('monthEventsSection').style.display=view==='month'?'block':'none';
   document.getElementById('weekView').style.display=view==='week'?'block':'none';
   renderAll();
 }
@@ -261,10 +274,15 @@ function changeMonth(dir){
 }
 
 function renderAll(){
-  if(curView==='month'){document.getElementById('monthLabel').textContent=MONTHS[curMonth]+' '+curYear;renderMonth();}
-  else{const end=new Date(curWeekStart);end.setDate(end.getDate()+6);document.getElementById('monthLabel').textContent=curWeekStart.getDate()+' → '+end.getDate()+' '+MONTHS[end.getMonth()];renderWeek();}
+  if(curView==='month'){
+    document.getElementById('monthLabel').textContent=MONTHS[curMonth]+' '+curYear;
+    renderMonth();renderMonthEvents();
+  } else {
+    const end=new Date(curWeekStart);end.setDate(end.getDate()+6);
+    document.getElementById('monthLabel').textContent=curWeekStart.getDate()+' → '+end.getDate()+' '+MONTHS[end.getMonth()];
+    renderWeek();
+  }
 }
-
 function renderMonth(){
   const grid=document.getElementById('calGrid');grid.innerHTML='';
   const today=toDS(new Date());
@@ -292,6 +310,55 @@ function renderMonth(){
   }
 }
 
+function renderMonthEvents(){
+  const section=document.getElementById('monthEventsSection');
+  section.innerHTML='';
+  const dim=new Date(curYear,curMonth+1,0).getDate();
+  const feries=[];
+  const evsList=[];
+
+  for(let d=1;d<=dim;d++){
+    const ds=curYear+'-'+String(curMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const wtype=getWorkType(ds);
+    const date=new Date(ds+'T12:00:00');
+    const dayName=DAYS[date.getDay()===0?6:date.getDay()-1];
+    if(wtype==='ferie'){
+      feries.push({ds,d,name:FERIE_NAMES[ds]||'Férié',dayName});
+    }
+    const dayEvs=getEventsForDay(ds);
+    dayEvs.forEach(ev=>evsList.push({...ev,d,dayName,wtype}));
+  }
+
+  // Fériés du mois
+  if(feries.length){
+    const title=document.createElement('div');title.className='month-events-title';title.textContent='🔴 Jours fériés du mois';
+    section.appendChild(title);
+    feries.forEach(f=>{
+      const row=document.createElement('div');row.className='ferie-row';
+      row.innerHTML='<div class="ferie-date">'+f.dayName.substring(0,3)+' '+f.d+'</div><div class="ferie-name">'+f.name+'</div>';
+      section.appendChild(row);
+    });
+  }
+
+  // Événements famille du mois
+  if(evsList.length){
+    const title2=document.createElement('div');title2.className='month-events-title';title2.style.marginTop='14px';title2.textContent='📅 Événements famille du mois';
+    section.appendChild(title2);
+    evsList.forEach(ev=>{
+      const wb=getWorkBadge(ev.wtype);
+      const row=document.createElement('div');row.className='month-event-row';
+      row.innerHTML='<div class="mer-date">'+ev.dayName.substring(0,3)+' '+ev.d+'</div><div class="mer-info"><div class="mer-title">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'+(ev.time_str?'<div class="mer-sub">⏰ '+ev.time_str+'</div>':'')+(ev.description?'<div class="mer-sub">'+ev.description+'</div>':'')+(wb.lbl?'<span class="mer-work '+wb.cls+'">'+wb.lbl+'</span>':'')+'</div>';
+      section.appendChild(row);
+    });
+  }
+
+  if(!feries.length&&!evsList.length){
+    const empty=document.createElement('div');
+    empty.style.cssText='text-align:center;color:#D1D5DB;font-size:13px;padding:16px;font-weight:600;';
+    empty.textContent='Aucun événement ce mois-ci';
+    section.appendChild(empty);
+  }
+}
 function renderWeek(){
   const container=document.getElementById('weekDays');container.innerHTML='';
   const today=toDS(new Date());
@@ -302,7 +369,7 @@ function renderWeek(){
     const dayEl=document.createElement('div');
     dayEl.className='week-day'+(ds===today?' today-week':'');
     const hdr=document.createElement('div');hdr.className='week-day-header';
-    const left=document.createElement('div');left.style.display='flex';left.style.alignItems='center';left.style.gap='8px';
+    const left=document.createElement('div');left.style.cssText='display:flex;align-items:center;gap:8px;';
     left.innerHTML='<span class="week-day-name">'+DAYS[i]+'</span><span class="week-day-date">'+date.getDate()+' '+MONTHS[date.getMonth()].substring(0,3)+'</span>';
     const badge=document.createElement('span');badge.className='week-day-badge '+wb.cls;badge.textContent=wb.lbl;
     hdr.appendChild(left);hdr.appendChild(badge);dayEl.appendChild(hdr);
