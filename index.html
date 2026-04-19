@@ -470,13 +470,3 @@ if (saved) { currentUser=JSON.parse(saved); showApp(); }
 </script>
 </body>
 </html>
-function renderAll() {
-  if (curView==='month') {
-    document.getElementById('monthLabel').textContent=MONTHS[curMonth]+' '+curYear;
-    renderMonth();
-  } else {
-    const end=new Date(curWeekStart); end.setDate(end.getDate()+6);
-    document.getElementById('monthLabel').textContent=curWeekStart.getDate()+' → '+end.getDate()+' '+MONTHS[end.getMonth()];
-    renderWeek();
-  }
-}
