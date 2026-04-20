@@ -49,8 +49,8 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .month-view{padding:0 16px 8px;}
 .cal-headers{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
 .cal-hdr{text-align:center;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;padding:6px 0;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
-.cal-day{background:white;border-radius:10px;min-height:72px;padding:4px 3px;cursor:pointer;border:2px solid transparent;position:relative;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;}
+.cal-day{background:white;border-radius:10px;height:76px;padding:4px 3px;cursor:pointer;border:2px solid transparent;position:relative;overflow:hidden;min-width:0;}
 .cal-day.empty{background:transparent;cursor:default;}
 .cal-day.today{outline:2px solid var(--primary);}
 .day-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
