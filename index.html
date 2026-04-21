@@ -270,9 +270,11 @@ function setView(view){
   curView=view;
   document.getElementById('tabMonth').className='vtab'+(view==='month'?' active':'');
   document.getElementById('tabWeek').className='vtab'+(view==='week'?' active':'');
+  document.getElementById('tabJournal').className='vtab'+(view==='journal'?' active':'');
   document.getElementById('monthView').style.display=view==='month'?'block':'none';
   document.getElementById('monthEventsSection').style.display=view==='month'?'block':'none';
   document.getElementById('weekView').style.display=view==='week'?'block':'none';
+  document.getElementById('journalView').style.display=view==='journal'?'block':'none';
   renderAll();
 }
 
