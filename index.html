@@ -479,7 +479,7 @@ const sorted=[...events].sort((a,b)=>{
       +'<div style="font-size:13px;font-weight:800;">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'
       +'<div style="font-size:10px;font-weight:700;color:'+whoColor+';">'+who+'</div>'
       +'</div>'
-      +'<div style="font-size:11px;color:#9CA3AF;margin-top:4px;">📆 Pour le '+ev.date_str+(ev.time_str?' à '+ev.time_str:'')+'</div>'
+     +'<div style="font-size:11px;color:#9CA3AF;margin-top:4px;">📆 Pour le '+ev.date_str.split('-').reverse().join('/')+(ev.time_str?' à '+ev.time_str:'')+'</div>'
       +'<div style="font-size:10px;color:#D1D5DB;margin-top:3px;">Ajouté le '+dt+'</div>'
 +'<button onclick="deleteEvent(\''+ev.id+'\')" style="margin-top:8px;background:#FEF2F2;border:none;color:#EF4444;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;">✕ Supprimer</button>';
     container.appendChild(row);
