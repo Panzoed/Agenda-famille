@@ -247,6 +247,9 @@ async function doLogin(){
   catch(e){showError('Erreur réseau');}
 }
 
+document.getElementById('loginPassword').addEventListener('keydown',function(e){
+  if(e.key==='Enter')doLogin();
+});
 function doLogout(){currentUser=null;sessionStorage.removeItem('agendaUser');document.getElementById('appWrap').style.display='none';document.getElementById('authWrap').style.display='flex';}
 
 function showApp(){
