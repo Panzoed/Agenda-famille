@@ -431,6 +431,14 @@ function openDayModal(ds,d){
 function closeDayModal(e){if(!e||e.target===document.getElementById('dayModalOverlay'))document.getElementById('dayModalOverlay').classList.remove('show');}
 function addEventForDay(){closeDayModal();openAddModal(selectedDay);}
 
+// ... code existant ...
+
+function renderActivity(){
+  const section=document.getElementById('activitySection');
+  if(!section)return;
+  section.innerHTML='';
+}
+
 const saved=sessionStorage.getItem('agendaUser');
 if(saved){currentUser=JSON.parse(saved);showApp();}
 </script>
