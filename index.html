@@ -439,8 +439,39 @@ function addEventForDay(){closeDayModal();openAddModal(selectedDay);}
 
 function renderActivity(){
   const section=document.getElementById('activitySection');
-  if(!section)return;
-  section.innerHTML='';
+  if(section)section.innerHTML='';
+  if(curView!=='journal')return;
+  const container=document.getElementById('journalView');
+  if(!container)return;
+  container.innerHTML='';
+  const title=document.createElement('div');
+  title.style.cssText='font-size:11px;font-weight:800;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;';
+  title.textContent='📋 Journal des événements';
+  container.appendChild(title);
+  const sorted=[...events].sort((a,b)=>{
+    const da=new Date(a.created_at||'2000-01-01');
+    const db=new Date(b.created_at||'2000-01-01');
+    return db-da;
+  });
+  if(!sorted.length){
+    container.innerHTML+='<div style="text-align:center;color:#D1D5DB;font-size:13px;padding:24px;font-weight:600;">Aucun événement</div>';
+    return;
+  }
+  sorted.forEach(ev=>{
+    const isMe=ev.created_by===currentUser.email;
+    const who=isMe?'👤 Vous':'👩 Laetitia';
+    const whoColor=isMe?'#3B82F6':'#EC4899';
+    const dt=ev.created_at?new Date(ev.created_at).toLocaleString('fr-BE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'--';
+    const row=document.createElement('div');
+    row.style.cssText='background:white;border-radius:12px;padding:12px 14px;margin-bottom:8px;border-left:4px solid '+whoColor+';';
+    row.innerHTML='<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+      +'<div style="font-size:13px;font-weight:800;">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'
+      +'<div style="font-size:10px;font-weight:700;color:'+whoColor+';">'+who+'</div>'
+      +'</div>'
+      +'<div style="font-size:11px;color:#9CA3AF;margin-top:4px;">📆 Pour le '+ev.date_str+(ev.time_str?' à '+ev.time_str:'')+'</div>'
+      +'<div style="font-size:10px;color:#D1D5DB;margin-top:3px;">Ajouté le '+dt+'</div>';
+    container.appendChild(row);
+  });
 }
 
 const saved=sessionStorage.getItem('agendaUser');
