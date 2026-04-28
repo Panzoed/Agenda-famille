@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Agenda Famille</title>
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#667eea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Agenda Famille">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -347,7 +354,6 @@ function renderMonthEvents(){
     dayEvs.forEach(ev=>evsList.push({...ev,d,dayName,wtype}));
   }
 
-  // Fériés du mois
   if(feries.length){
     const title=document.createElement('div');title.className='month-events-title';title.textContent='🔴 Jours fériés du mois';
     section.appendChild(title);
@@ -358,7 +364,6 @@ function renderMonthEvents(){
     });
   }
 
-  // Événements famille du mois
   if(evsList.length){
     const title2=document.createElement('div');title2.className='month-events-title';title2.style.marginTop='14px';title2.textContent='📅 Événements famille du mois';
     section.appendChild(title2);
@@ -442,8 +447,6 @@ function openDayModal(ds,d){
 function closeDayModal(e){if(!e||e.target===document.getElementById('dayModalOverlay'))document.getElementById('dayModalOverlay').classList.remove('show');}
 function addEventForDay(){closeDayModal();openAddModal(selectedDay);}
 
-// ... code existant ...
-
 function renderActivity(){
   const section=document.getElementById('activitySection');
   if(section)section.innerHTML='';
@@ -489,6 +492,15 @@ const sorted=[...events].sort((a,b)=>{
 
 const saved=sessionStorage.getItem('agendaUser');
 if(saved){currentUser=JSON.parse(saved);showApp();}
+
+// Service Worker PWA
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(()=>console.log('PWA prête'))
+      .catch(err=>console.log('SW erreur:',err));
+  });
+}
 </script>
 </body>
 </html>
