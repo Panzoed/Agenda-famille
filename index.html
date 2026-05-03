@@ -96,6 +96,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .week-event{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#FFFBEB;border-radius:10px;margin-bottom:6px;border-left:3px solid var(--primary);}
 .week-event-time{font-size:10px;font-weight:800;color:var(--primary2);min-width:35px;}
 .btn-delete-event{background:#FEF2F2;border:none;color:#EF4444;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;}
+.btn-edit-event{background:#EFF6FF;border:none;color:#3B82F6;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;}
 .no-events{font-size:12px;color:#D1D5DB;font-weight:600;text-align:center;padding:8px 0;}
 .fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;background:linear-gradient(135deg,var(--primary),var(--accent));border:none;border-radius:50%;color:white;font-size:28px;cursor:pointer;box-shadow:0 8px 24px rgba(245,158,11,0.4);z-index:100;display:flex;align-items:center;justify-content:center;}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end;justify-content:center;}
@@ -120,6 +121,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .day-event-time{font-size:11px;color:var(--muted);margin-top:2px;}
 .day-event-desc{font-size:12px;color:#6B7280;margin-top:2px;}
 .day-event-by{font-size:10px;color:var(--primary2);font-weight:700;margin-top:2px;}
+.day-event-actions{display:flex;flex-direction:column;gap:4px;}
 .btn-add-day{width:100%;padding:12px;background:linear-gradient(135deg,var(--primary),var(--accent));border:none;border-radius:12px;color:white;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;}
 .activity-section{padding:0 16px 16px;}
 .activity-title{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
@@ -127,7 +129,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .activity-who{font-size:12px;font-weight:800;}
 .activity-what{font-size:12px;color:var(--muted);}
 .activity-when{font-size:10px;color:#D1D5DB;margin-top:2px;}
-  .btn-close-day{width:100%;padding:11px;background:#F9FAFB;border:2px solid #F3F4F6;border-radius:12px;color:var(--muted);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;}
+.btn-close-day{width:100%;padding:11px;background:#F9FAFB;border:2px solid #F3F4F6;border-radius:12px;color:var(--muted);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;}
 </style>
 </head>
 <body>
@@ -160,8 +162,8 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
   </div>
   <div class="view-tabs">
     <button class="vtab active" id="tabMonth" onclick="setView('month')">📅 Mois</button>
-<button class="vtab" id="tabWeek" onclick="setView('week')">📆 Semaine</button>
-<button class="vtab" id="tabJournal" onclick="setView('journal')">📋 Journal</button>
+    <button class="vtab" id="tabWeek" onclick="setView('week')">📆 Semaine</button>
+    <button class="vtab" id="tabJournal" onclick="setView('journal')">📋 Journal</button>
   </div>
   <div class="month-nav">
     <button class="mnav-btn" onclick="changeMonth(-1)">‹</button>
@@ -188,14 +190,15 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
   <div class="week-view" id="weekView" style="display:none">
     <div id="weekDays"></div>
   </div>
-<div class="activity-section" id="activitySection"></div>
-<div class="journal-view" id="journalView" style="display:none;padding:0 16px 16px;"></div>
-<button class="fab" onclick="openAddModal()">+</button>
+  <div class="activity-section" id="activitySection"></div>
+  <div class="journal-view" id="journalView" style="display:none;padding:0 16px 16px;"></div>
+  <button class="fab" onclick="openAddModal()">+</button>
 </div>
 
+<!-- Modal Ajout / Modification -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal">
-    <div class="modal-title">✏️ Nouvel événement</div>
+    <div class="modal-title" id="modalTitle">✏️ Nouvel événement</div>
     <div class="modal-group"><label>Titre *</label><input type="text" id="evTitle" placeholder="Ex: Courses, Médecin..."></div>
     <div class="modal-group"><label>Description</label><textarea id="evDesc" placeholder="Détails optionnels..."></textarea></div>
     <div class="modal-row">
@@ -217,6 +220,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
   </div>
 </div>
 
+<!-- Modal Jour -->
 <div class="day-modal-overlay" id="dayModalOverlay" onclick="closeDayModal(event)">
   <div class="day-modal">
     <div class="day-modal-title" id="dayModalTitle"></div>
@@ -226,8 +230,12 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
     <button class="btn-close-day" onclick="closeDayModal()">Fermer</button>
   </div>
 </div>
+
 <script>
 let currentUser=null,events=[],curYear=new Date().getFullYear(),curMonth=new Date().getMonth(),curView='month',curWeekStart=null,selectedDay=null;
+// Pour la modification : id de l'événement en cours d'édition (null = nouvel événement)
+let editingEventId=null;
+
 const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const DAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const TYPE_ICONS={task:'✅',rdv:'📍',family:'👨‍👩‍👧',fun:'🎉',important:'⚠️'};
@@ -308,6 +316,7 @@ function renderAll(){
     renderActivity();
   }
 }
+
 function renderMonth(){
   const grid=document.getElementById('calGrid');grid.innerHTML='';
   const today=toDS(new Date());
@@ -370,7 +379,23 @@ function renderMonthEvents(){
     evsList.forEach(ev=>{
       const wb=getWorkBadge(ev.wtype);
       const row=document.createElement('div');row.className='month-event-row';
-      row.innerHTML='<div class="mer-date">'+ev.dayName.substring(0,3)+' '+ev.d+'</div><div class="mer-info"><div class="mer-title">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'+(ev.time_str?'<div class="mer-sub">⏰ '+ev.time_str+'</div>':'')+(ev.description?'<div class="mer-sub">'+ev.description+'</div>':'')+(wb.lbl?'<span class="mer-work '+wb.cls+'">'+wb.lbl+'</span>':'')+'</div>';
+      row.innerHTML='<div class="mer-date">'+ev.dayName.substring(0,3)+' '+ev.d+'</div>'
+        +'<div class="mer-info"><div class="mer-title">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'
+        +(ev.time_str?'<div class="mer-sub">⏰ '+ev.time_str+'</div>':'')
+        +(ev.description?'<div class="mer-sub">'+ev.description+'</div>':'')
+        +(wb.lbl?'<span class="mer-work '+wb.cls+'">'+wb.lbl+'</span>':'')
+        +'</div>';
+      // Boutons modifier/supprimer dans la vue mois
+      const actions=document.createElement('div');
+      actions.style.cssText='display:flex;flex-direction:column;gap:4px;';
+      const btnEdit=document.createElement('button');
+      btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.title='Modifier';
+      btnEdit.onclick=(e)=>{e.stopPropagation();openEditModal(ev.id);};
+      const btnDel=document.createElement('button');
+      btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.title='Supprimer';
+      btnDel.onclick=(e)=>{e.stopPropagation();deleteEvent(ev.id);};
+      actions.appendChild(btnEdit);actions.appendChild(btnDel);
+      row.appendChild(actions);
       section.appendChild(row);
     });
   }
@@ -382,6 +407,7 @@ function renderMonthEvents(){
     section.appendChild(empty);
   }
 }
+
 function renderWeek(){
   const container=document.getElementById('weekDays');container.innerHTML='';
   const today=toDS(new Date());
@@ -397,7 +423,24 @@ function renderWeek(){
     const badge=document.createElement('span');badge.className='week-day-badge '+wb.cls;badge.textContent=wb.lbl;
     hdr.appendChild(left);hdr.appendChild(badge);dayEl.appendChild(hdr);
     if(!evs.length){const e=document.createElement('div');e.className='no-events';e.textContent='Aucun événement';dayEl.appendChild(e);}
-    else{evs.forEach(ev=>{const el=document.createElement('div');el.className='week-event';el.innerHTML='<span class="week-event-time">'+(ev.time_str||'--:--')+'</span><div style="flex:1"><div style="font-size:13px;font-weight:700;">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'+(ev.description?'<div style="font-size:11px;color:#9CA3AF">'+ev.description+'</div>':'')+'</div><button class="btn-delete-event" onclick="deleteEvent(\''+ev.id+'\')">✕</button>';dayEl.appendChild(el);});}
+    else{
+      evs.forEach(ev=>{
+        const el=document.createElement('div');el.className='week-event';
+        el.innerHTML='<span class="week-event-time">'+(ev.time_str||'--:--')+'</span>'
+          +'<div style="flex:1"><div style="font-size:13px;font-weight:700;">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'
+          +(ev.description?'<div style="font-size:11px;color:#9CA3AF">'+ev.description+'</div>':'')
+          +'</div>';
+        // Boutons modifier + supprimer
+        const btnEdit=document.createElement('button');
+        btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.title='Modifier';
+        btnEdit.onclick=()=>openEditModal(ev.id);
+        const btnDel=document.createElement('button');
+        btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.title='Supprimer';
+        btnDel.onclick=()=>deleteEvent(ev.id);
+        el.appendChild(btnEdit);el.appendChild(btnDel);
+        dayEl.appendChild(el);
+      });
+    }
     const btn=document.createElement('button');
     btn.style.cssText='width:100%;margin-top:6px;padding:7px;background:#FCE7F3;border:none;border-radius:8px;color:#BE185D;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;';
     btn.textContent='+ Ajouter';btn.onclick=()=>{openAddModal();document.getElementById('evDate').value=ds;};
@@ -405,23 +448,62 @@ function renderWeek(){
   }
 }
 
+// ─── Ouvrir le modal en mode AJOUT ───────────────────────────────────────────
 function openAddModal(ds){
-  document.getElementById('evTitle').value='';document.getElementById('evDesc').value='';
+  editingEventId=null;
+  document.getElementById('modalTitle').textContent='✏️ Nouvel événement';
+  document.getElementById('evTitle').value='';
+  document.getElementById('evDesc').value='';
   document.getElementById('evDate').value=ds||toDS(new Date());
-  document.getElementById('evTime').value='';document.getElementById('evType').value='task';
+  document.getElementById('evTime').value='';
+  document.getElementById('evType').value='task';
   document.getElementById('modalOverlay').classList.add('show');
+}
+
+// ─── Ouvrir le modal en mode MODIFICATION ────────────────────────────────────
+function openEditModal(id){
+  const ev=events.find(e=>e.id===id);
+  if(!ev)return;
+  editingEventId=id;
+  document.getElementById('modalTitle').textContent='✏️ Modifier l\'événement';
+  document.getElementById('evTitle').value=ev.title||'';
+  document.getElementById('evDesc').value=ev.description||'';
+  document.getElementById('evDate').value=ev.date_str||'';
+  document.getElementById('evTime').value=ev.time_str||'';
+  document.getElementById('evType').value=ev.type||'task';
+  document.getElementById('modalOverlay').classList.add('show');
+  // Fermer le modal jour si ouvert
+  document.getElementById('dayModalOverlay').classList.remove('show');
 }
 
 function closeModal(e){if(!e||e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('show');}
 
+// ─── Enregistrer (ajout OU modification) ─────────────────────────────────────
 async function saveEvent(){
   const title=document.getElementById('evTitle').value.trim();
   const date_str=document.getElementById('evDate').value;
   if(!title||!date_str)return alert('Titre et date obligatoires !');
-  const body={action:'add',title,description:document.getElementById('evDesc').value.trim(),date_str,time_str:document.getElementById('evTime').value||null,type:document.getElementById('evType').value,created_by:currentUser.email,created_by_name:currentUser.name};
-  try{const res=await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  const data=await res.json();events.push(data);closeModal();renderAll();}
-  catch(e){alert("Erreur lors de l'ajout");}
+
+  if(editingEventId){
+    // MODE MODIFICATION : delete + re-add avec les nouvelles valeurs
+    // (on supprime l'ancien et on recrée, car l'API n'a pas de update)
+    try{
+      await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id:editingEventId})});
+      const body={action:'add',title,description:document.getElementById('evDesc').value.trim(),date_str,time_str:document.getElementById('evTime').value||null,type:document.getElementById('evType').value,created_by:currentUser.email,created_by_name:currentUser.name};
+      const res=await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      const data=await res.json();
+      events=events.filter(e=>e.id!==editingEventId);
+      events.push(data);
+      editingEventId=null;
+      closeModal();renderAll();
+    }catch(e){alert("Erreur lors de la modification");}
+  } else {
+    // MODE AJOUT
+    const body={action:'add',title,description:document.getElementById('evDesc').value.trim(),date_str,time_str:document.getElementById('evTime').value||null,type:document.getElementById('evType').value,created_by:currentUser.email,created_by_name:currentUser.name};
+    try{const res=await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const data=await res.json();events.push(data);closeModal();renderAll();}
+    catch(e){alert("Erreur lors de l'ajout");}
+  }
 }
 
 async function deleteEvent(id){
@@ -439,8 +521,32 @@ function openDayModal(ds,d){
   badge.textContent=wb.lbl;badge.className='day-modal-badge '+wb.cls;
   const evs=getEventsForDay(ds);
   const list=document.getElementById('dayEventsList');list.innerHTML='';
-  if(!evs.length){list.innerHTML='<div style="text-align:center;color:#9CA3AF;font-size:13px;padding:16px">Aucun événement ce jour</div>';}
-  else{evs.forEach(ev=>{const el=document.createElement('div');el.className='day-event-item';el.innerHTML='<div style="font-size:24px">'+(TYPE_ICONS[ev.type]||'📅')+'</div><div class="day-event-info"><div class="day-event-title">'+ev.title+'</div>'+(ev.time_str?'<div class="day-event-time">⏰ '+ev.time_str+'</div>':'')+(ev.description?'<div class="day-event-desc">'+ev.description+'</div>':'')+'<div class="day-event-by">Ajouté par '+(ev.created_by===currentUser.email?'vous':'votre partenaire')+'</div></div><button class="btn-delete-event" onclick="deleteEvent(\''+ev.id+'\')">✕</button>';list.appendChild(el);});}
+  if(!evs.length){
+    list.innerHTML='<div style="text-align:center;color:#9CA3AF;font-size:13px;padding:16px">Aucun événement ce jour</div>';
+  } else {
+    evs.forEach(ev=>{
+      const el=document.createElement('div');el.className='day-event-item';
+      el.innerHTML='<div style="font-size:24px">'+(TYPE_ICONS[ev.type]||'📅')+'</div>'
+        +'<div class="day-event-info">'
+        +'<div class="day-event-title">'+ev.title+'</div>'
+        +(ev.time_str?'<div class="day-event-time">⏰ '+ev.time_str+'</div>':'')
+        +(ev.description?'<div class="day-event-desc">'+ev.description+'</div>':'')
+        +'<div class="day-event-by">Ajouté par '+(ev.created_by===currentUser.email?'vous':'votre partenaire')+'</div>'
+        +'</div>';
+      // Boutons modifier + supprimer dans le modal jour
+      const actions=document.createElement('div');
+      actions.className='day-event-actions';
+      const btnEdit=document.createElement('button');
+      btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.title='Modifier';
+      btnEdit.onclick=()=>openEditModal(ev.id);
+      const btnDel=document.createElement('button');
+      btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.title='Supprimer';
+      btnDel.onclick=()=>deleteEvent(ev.id);
+      actions.appendChild(btnEdit);actions.appendChild(btnDel);
+      el.appendChild(actions);
+      list.appendChild(el);
+    });
+  }
   document.getElementById('dayModalOverlay').classList.add('show');
 }
 
@@ -459,11 +565,11 @@ function renderActivity(){
   title.textContent='📋 Journal des événements';
   container.appendChild(title);
   const btnClear=document.createElement('button');
-btnClear.textContent='🗑️ Tout effacer';
-btnClear.style.cssText='margin-bottom:12px;background:#FEF2F2;border:none;color:#EF4444;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;';
-btnClear.onclick=async()=>{if(!confirm('Supprimer tous les événements ?'))return;for(const ev of events){await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id:ev.id})});}events=[];renderAll();};
-container.appendChild(btnClear);
-const sorted=[...events].sort((a,b)=>{
+  btnClear.textContent='🗑️ Tout effacer';
+  btnClear.style.cssText='margin-bottom:12px;background:#FEF2F2;border:none;color:#EF4444;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;';
+  btnClear.onclick=async()=>{if(!confirm('Supprimer tous les événements ?'))return;for(const ev of events){await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id:ev.id})});}events=[];renderAll();};
+  container.appendChild(btnClear);
+  const sorted=[...events].sort((a,b)=>{
     const da=new Date(a.created_at||'2000-01-01');
     const db=new Date(b.created_at||'2000-01-01');
     return db-da;
@@ -483,9 +589,21 @@ const sorted=[...events].sort((a,b)=>{
       +'<div style="font-size:13px;font-weight:800;">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'
       +'<div style="font-size:10px;font-weight:700;color:'+whoColor+';">'+who+'</div>'
       +'</div>'
-     +'<div style="font-size:11px;color:#9CA3AF;margin-top:4px;">📆 Pour le '+ev.date_str.split('-').reverse().join('/')+(ev.time_str?' à '+ev.time_str:'')+'</div>'
+      +'<div style="font-size:11px;color:#9CA3AF;margin-top:4px;">📆 Pour le '+ev.date_str.split('-').reverse().join('/')+(ev.time_str?' à '+ev.time_str:'')+'</div>'
       +'<div style="font-size:10px;color:#D1D5DB;margin-top:3px;">Ajouté le '+dt+'</div>'
-+'<button onclick="deleteEvent(\''+ev.id+'\')" style="margin-top:8px;background:#FEF2F2;border:none;color:#EF4444;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;">✕ Supprimer</button>';
+      +'<div style="display:flex;gap:6px;margin-top:8px;">'
+      +'</div>';
+    // Boutons modifier + supprimer dans le journal
+    const actionsDiv=row.querySelector('div:last-child');
+    const btnEdit=document.createElement('button');
+    btnEdit.textContent='✏️ Modifier';
+    btnEdit.style.cssText='background:#EFF6FF;border:none;color:#3B82F6;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;';
+    btnEdit.onclick=()=>openEditModal(ev.id);
+    const btnDel=document.createElement('button');
+    btnDel.textContent='✕ Supprimer';
+    btnDel.style.cssText='background:#FEF2F2;border:none;color:#EF4444;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;';
+    btnDel.onclick=()=>deleteEvent(ev.id);
+    actionsDiv.appendChild(btnEdit);actionsDiv.appendChild(btnDel);
     container.appendChild(row);
   });
 }
