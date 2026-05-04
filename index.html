@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Agenda Famille</title>
-<!-- PWA -->
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#667eea">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +15,6 @@
 :root {
   --bg:#FFF8F0; --primary:#F59E0B; --primary2:#D97706; --accent:#EC4899;
   --text:#1F2937; --muted:#9CA3AF; --border:#F3F4F6;
-  --matin:#3B82F6; --aprem:#F59E0B; --ferie:#DC2626; --fermeture:#16A34A;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
@@ -33,17 +31,23 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .form-group input{width:100%;background:#F9FAFB;border:2px solid #F3F4F6;border-radius:12px;padding:12px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none;transition:border 0.2s;}
 .form-group input:focus{border-color:var(--primary);}
 .btn-login{width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--primary2));border:none;border-radius:12px;color:white;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;margin-top:4px;}
+.btn-secondary{width:100%;padding:12px;background:#F9FAFB;border:2px solid #F3F4F6;border-radius:12px;color:var(--muted);font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;}
 .alert{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;display:none;font-weight:600;}
 .alert-error{background:#FEF2F2;border:2px solid #FCA5A5;color:#DC2626;}
+.alert-success{background:#F0FDF4;border:2px solid #86EFAC;color:#16A34A;}
 .signature{font-size:11px;color:#D1D5DB;text-align:center;}
 .signature span{color:#93C5FD;}
+.toggle-auth{text-align:center;margin-top:12px;font-size:12px;color:var(--muted);}
+.toggle-auth a{color:var(--primary);font-weight:700;cursor:pointer;}
 .app-wrap{display:none;padding:0 0 80px;}
 .topbar{background:white;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(0,0,0,0.06);position:sticky;top:0;z-index:50;}
 .topbar-left{display:flex;align-items:center;gap:10px;}
 .topbar-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:white;}
 .topbar-name{font-size:14px;font-weight:800;}
 .topbar-sub{font-size:11px;color:var(--muted);}
+.topbar-right{display:flex;gap:8px;align-items:center;}
 .btn-deconnect{background:#FEF2F2;border:none;color:#EF4444;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
+.btn-admin{background:#EFF6FF;border:none;color:#3B82F6;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
 .view-tabs{display:flex;gap:8px;padding:14px 16px 0;}
 .vtab{flex:1;padding:10px;border-radius:12px;border:2px solid var(--border);background:white;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);text-align:center;}
 .vtab.active{background:var(--primary);border-color:var(--primary);color:white;}
@@ -124,31 +128,57 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .day-event-actions{display:flex;flex-direction:column;gap:4px;}
 .btn-add-day{width:100%;padding:12px;background:linear-gradient(135deg,var(--primary),var(--accent));border:none;border-radius:12px;color:white;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;}
 .activity-section{padding:0 16px 16px;}
-.activity-title{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
-.activity-item{background:white;border-radius:12px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;border-left:3px solid #E5E7EB;}
-.activity-who{font-size:12px;font-weight:800;}
-.activity-what{font-size:12px;color:var(--muted);}
-.activity-when{font-size:10px;color:#D1D5DB;margin-top:2px;}
 .btn-close-day{width:100%;padding:11px;background:#F9FAFB;border:2px solid #F3F4F6;border-radius:12px;color:var(--muted);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;}
+.admin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:flex-start;justify-content:center;padding:20px;}
+.admin-overlay.show{display:flex;}
+.admin-panel{background:white;border-radius:24px;padding:24px 20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;margin-top:20px;}
+.admin-title{font-size:20px;font-weight:900;margin-bottom:16px;}
+.admin-card{background:#F9FAFB;border-radius:12px;padding:14px;margin-bottom:10px;border-left:4px solid var(--primary);}
+.admin-card-name{font-size:14px;font-weight:800;}
+.admin-card-email{font-size:12px;color:var(--muted);margin-top:2px;}
+.admin-card-actions{display:flex;gap:8px;margin-top:10px;}
+.btn-approve{flex:1;padding:8px;background:#F0FDF4;border:none;color:#16A34A;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;}
+.btn-reject{flex:1;padding:8px;background:#FEF2F2;border:none;color:#EF4444;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;}
+.admin-empty{text-align:center;color:var(--muted);font-size:13px;padding:24px;font-weight:600;}
+.badge-pending{display:inline-block;background:#FEF3C7;color:#B45309;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;margin-left:4px;}
 </style>
 </head>
 <body>
+
+<!-- AUTH -->
 <div class="auth-wrap" id="authWrap">
   <div class="auth-card">
     <div class="family-logo">
       <span class="family-emoji">👨‍👩‍👧</span>
       <div class="family-title">Agenda <span>Famille</span></div>
-      <div class="family-sub">Organisez votre vie ensemble</div>
+      <div class="family-sub" id="authSub">Organisez votre vie ensemble</div>
       <div class="family-divider"></div>
     </div>
     <div class="alert alert-error" id="alertError"></div>
-    <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="votre@email.com"></div>
-    <div class="form-group"><label>Mot de passe</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
-    <button class="btn-login" onclick="doLogin()">Se connecter 🚀</button>
+    <div class="alert alert-success" id="alertSuccess"></div>
+
+    <!-- Connexion -->
+    <div id="loginForm">
+      <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="votre@email.com"></div>
+      <div class="form-group"><label>Mot de passe</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+      <button class="btn-login" onclick="doLogin()">Se connecter 🚀</button>
+      <div class="toggle-auth">Pas encore de compte ? <a onclick="showRegister()">S'inscrire</a></div>
+    </div>
+
+    <!-- Inscription -->
+    <div id="registerForm" style="display:none">
+      <div class="form-group"><label>Votre prénom</label><input type="text" id="regName" placeholder="Ex: Marie"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="votre@email.com"></div>
+      <div class="form-group"><label>Mot de passe</label><input type="password" id="regPassword" placeholder="••••••••"></div>
+      <div class="form-group"><label>Nom de votre famille</label><input type="text" id="regFamily" placeholder="Ex: Famille Dupont"></div>
+      <button class="btn-login" onclick="doRegister()">Envoyer la demande 📨</button>
+      <div class="toggle-auth">Déjà un compte ? <a onclick="showLogin()">Se connecter</a></div>
+    </div>
   </div>
   <div class="signature">Créé par <span>Emmanuel Acabo</span></div>
 </div>
 
+<!-- APP -->
 <div class="app-wrap" id="appWrap">
   <div class="topbar">
     <div class="topbar-left">
@@ -158,7 +188,10 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
         <div class="topbar-sub">👨‍👩‍👧 Agenda Famille</div>
       </div>
     </div>
-    <button class="btn-deconnect" onclick="doLogout()">Déconnexion</button>
+    <div class="topbar-right">
+      <button class="btn-admin" id="btnAdmin" onclick="openAdmin()" style="display:none">🔧 Admin <span class="badge-pending" id="pendingBadge" style="display:none">0</span></button>
+      <button class="btn-deconnect" onclick="doLogout()">Déconnexion</button>
+    </div>
   </div>
   <div class="view-tabs">
     <button class="vtab active" id="tabMonth" onclick="setView('month')">📅 Mois</button>
@@ -187,15 +220,13 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
     <div class="cal-grid" id="calGrid"></div>
   </div>
   <div class="month-events-section" id="monthEventsSection"></div>
-  <div class="week-view" id="weekView" style="display:none">
-    <div id="weekDays"></div>
-  </div>
+  <div class="week-view" id="weekView" style="display:none"><div id="weekDays"></div></div>
   <div class="activity-section" id="activitySection"></div>
   <div class="journal-view" id="journalView" style="display:none;padding:0 16px 16px;"></div>
   <button class="fab" onclick="openAddModal()">+</button>
 </div>
 
-<!-- Modal Ajout / Modification -->
+<!-- Modal Ajout/Modification -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-title" id="modalTitle">✏️ Nouvel événement</div>
@@ -231,11 +262,18 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
   </div>
 </div>
 
-<script>
-let currentUser=null,events=[],curYear=new Date().getFullYear(),curMonth=new Date().getMonth(),curView='month',curWeekStart=null,selectedDay=null;
-// Pour la modification : id de l'événement en cours d'édition (null = nouvel événement)
-let editingEventId=null;
+<!-- Panel Admin -->
+<div class="admin-overlay" id="adminOverlay" onclick="closeAdmin(event)">
+  <div class="admin-panel">
+    <div class="admin-title">🔧 Demandes d'inscription</div>
+    <div id="adminList"></div>
+    <button class="btn-cancel-modal" onclick="closeAdmin()">Fermer</button>
+  </div>
+</div>
 
+<script>
+const EMAIL_ADMIN='siciliano_messinese@hotmail.it';
+let currentUser=null,events=[],curYear=new Date().getFullYear(),curMonth=new Date().getMonth(),curView='month',curWeekStart=null,selectedDay=null,editingEventId=null;
 const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const DAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const TYPE_ICONS={task:'✅',rdv:'📍',family:'👨‍👩‍👧',fun:'🎉',important:'⚠️'};
@@ -251,7 +289,11 @@ function getWorkBadge(t){const m={matin:{cls:'dw-matin',lbl:'Matin'},aprem:{cls:
 function getWeekBadge(t){const m={matin:{cls:'wdb-matin',lbl:'🌅 Matin'},aprem:{cls:'wdb-aprem',lbl:'🌆 Après-midi'},ferie:{cls:'wdb-ferie',lbl:'🔴 Férié'},fermeture:{cls:'wdb-fermeture',lbl:'🏭 Fermé'},we:{cls:'wdb-we',lbl:'Weekend'}};return m[t]||m.we;}
 function getMonday(d){const date=new Date(d);const day=date.getDay()||7;date.setDate(date.getDate()-day+1);date.setHours(0,0,0,0);return date;}
 function toDS(date){return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');}
-function showError(msg){const el=document.getElementById('alertError');el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',3000);}
+function showError(msg){const el=document.getElementById('alertError');el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',4000);}
+function showSuccess(msg){const el=document.getElementById('alertSuccess');el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',5000);}
+
+function showRegister(){document.getElementById('loginForm').style.display='none';document.getElementById('registerForm').style.display='block';document.getElementById('authSub').textContent='Créez votre agenda famille';document.getElementById('alertError').style.display='none';document.getElementById('alertSuccess').style.display='none';}
+function showLogin(){document.getElementById('loginForm').style.display='block';document.getElementById('registerForm').style.display='none';document.getElementById('authSub').textContent='Organisez votre vie ensemble';document.getElementById('alertError').style.display='none';document.getElementById('alertSuccess').style.display='none';}
 
 async function doLogin(){
   const email=document.getElementById('loginEmail').value.trim().toLowerCase();
@@ -263,10 +305,21 @@ async function doLogin(){
   catch(e){showError('Erreur réseau');}
 }
 
-document.getElementById('loginPassword').addEventListener('keydown',function(e){
-  if(e.key==='Enter')doLogin();
-});
-function doLogout(){currentUser=null;sessionStorage.removeItem('agendaUser');document.getElementById('appWrap').style.display='none';document.getElementById('authWrap').style.display='flex';}
+async function doRegister(){
+  const name=document.getElementById('regName').value.trim();
+  const email=document.getElementById('regEmail').value.trim().toLowerCase();
+  const password=document.getElementById('regPassword').value;
+  const family_name=document.getElementById('regFamily').value.trim();
+  if(!name||!email||!password||!family_name)return showError('Tous les champs sont obligatoires');
+  try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'register',name,email,password,family_name})});
+  const data=await res.json();if(!res.ok)return showError(data.error||'Erreur');
+  showSuccess('✅ Demande envoyée ! Emmanuel va approuver votre compte. Vous recevrez un email.');
+  setTimeout(()=>showLogin(),3000);}
+  catch(e){showError('Erreur réseau');}
+}
+
+document.getElementById('loginPassword').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+function doLogout(){currentUser=null;sessionStorage.removeItem('agendaUser');document.getElementById('appWrap').style.display='none';document.getElementById('authWrap').style.display='flex';showLogin();}
 
 function showApp(){
   curWeekStart=getMonday(new Date());
@@ -274,17 +327,51 @@ function showApp(){
   document.getElementById('appWrap').style.display='block';
   document.getElementById('topName').textContent=currentUser.name;
   document.getElementById('topAvatar').textContent=currentUser.name.charAt(0).toUpperCase();
+  if(currentUser.email===EMAIL_ADMIN){document.getElementById('btnAdmin').style.display='block';loadPendingCount();}
   loadEvents();
 }
 
+async function loadPendingCount(){
+  try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pending_list'})});
+  const data=await res.json();const badge=document.getElementById('pendingBadge');
+  if(data.length>0){badge.textContent=data.length;badge.style.display='inline';}else{badge.style.display='none';}}catch(e){}
+}
+
+async function openAdmin(){
+  document.getElementById('adminOverlay').classList.add('show');
+  const list=document.getElementById('adminList');
+  list.innerHTML='<div style="text-align:center;color:#9CA3AF;padding:16px;">Chargement...</div>';
+  try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pending_list'})});
+  const data=await res.json();list.innerHTML='';
+  if(!data.length){list.innerHTML='<div class="admin-empty">✅ Aucune demande en attente</div>';return;}
+  data.forEach(user=>{
+    const card=document.createElement('div');card.className='admin-card';
+    card.innerHTML='<div class="admin-card-name">'+user.name+'</div><div class="admin-card-email">'+user.email+'</div><div class="admin-card-actions"><button class="btn-approve" onclick="approveUser(\''+user.id+'\',this)">✅ Approuver</button><button class="btn-reject" onclick="rejectUser(\''+user.id+'\',this)">❌ Refuser</button></div>';
+    list.appendChild(card);
+  });}catch(e){list.innerHTML='<div class="admin-empty">Erreur de chargement</div>';}
+}
+
+async function approveUser(id,btn){
+  btn.textContent='...';
+  await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'approve',user_id:id})});
+  btn.closest('.admin-card').remove();loadPendingCount();
+  if(!document.getElementById('adminList').children.length)document.getElementById('adminList').innerHTML='<div class="admin-empty">✅ Aucune demande en attente</div>';
+}
+async function rejectUser(id,btn){
+  btn.textContent='...';
+  await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'reject',user_id:id})});
+  btn.closest('.admin-card').remove();loadPendingCount();
+  if(!document.getElementById('adminList').children.length)document.getElementById('adminList').innerHTML='<div class="admin-empty">✅ Aucune demande en attente</div>';
+}
+function closeAdmin(e){if(!e||e.target===document.getElementById('adminOverlay'))document.getElementById('adminOverlay').classList.remove('show');}
+
 async function loadEvents(){
-  try{const res=await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list'})});
+  try{const res=await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list',family_id:currentUser.family_id})});
   events=await res.json();}catch(e){events=[];}
   renderAll();
 }
 
 function getEventsForDay(ds){return events.filter(e=>e.date_str===ds);}
-
 function setView(view){
   curView=view;
   document.getElementById('tabMonth').className='vtab'+(view==='month'?' active':'');
@@ -296,27 +383,16 @@ function setView(view){
   document.getElementById('journalView').style.display=view==='journal'?'block':'none';
   renderAll();
 }
-
 function changeMonth(dir){
   if(curView==='month'){curMonth+=dir;if(curMonth<0){curMonth=11;curYear--;}if(curMonth>11){curMonth=0;curYear++;}}
   else{curWeekStart=new Date(curWeekStart);curWeekStart.setDate(curWeekStart.getDate()+dir*7);}
   renderAll();
 }
-
 function renderAll(){
-  if(curView==='month'){
-    document.getElementById('monthLabel').textContent=MONTHS[curMonth]+' '+curYear;
-    renderMonth();renderMonthEvents();renderActivity();
-  } else if(curView==='week'){
-    const end=new Date(curWeekStart);end.setDate(end.getDate()+6);
-    document.getElementById('monthLabel').textContent=curWeekStart.getDate()+' → '+end.getDate()+' '+MONTHS[end.getMonth()];
-    renderWeek();renderActivity();
-  } else if(curView==='journal'){
-    document.getElementById('monthLabel').textContent='Journal';
-    renderActivity();
-  }
+  if(curView==='month'){document.getElementById('monthLabel').textContent=MONTHS[curMonth]+' '+curYear;renderMonth();renderMonthEvents();renderActivity();}
+  else if(curView==='week'){const end=new Date(curWeekStart);end.setDate(end.getDate()+6);document.getElementById('monthLabel').textContent=curWeekStart.getDate()+' → '+end.getDate()+' '+MONTHS[end.getMonth()];renderWeek();renderActivity();}
+  else if(curView==='journal'){document.getElementById('monthLabel').textContent='Journal';renderActivity();}
 }
-
 function renderMonth(){
   const grid=document.getElementById('calGrid');grid.innerHTML='';
   const today=toDS(new Date());
@@ -325,14 +401,10 @@ function renderMonth(){
   for(let i=firstDay-1;i>0;i--){const d=document.createElement('div');d.className='cal-day empty';grid.appendChild(d);}
   for(let d=1;d<=dim;d++){
     const ds=curYear+'-'+String(curMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const evs=getEventsForDay(ds);
-    const wtype=getWorkType(ds);
-    const wb=getWorkBadge(wtype);
+    const evs=getEventsForDay(ds);const wtype=getWorkType(ds);const wb=getWorkBadge(wtype);
     const borderMap={matin:'#BFDBFE',aprem:'#FDE68A',ferie:'#FECACA',fermeture:'#A7F3D0',we:'#F3F4F6'};
-    const cell=document.createElement('div');
-    cell.className='cal-day'+(ds===today?' today':'');
-    cell.style.borderColor=borderMap[wtype]||'#F3F4F6';
-    cell.style.borderWidth='2px';cell.style.borderStyle='solid';
+    const cell=document.createElement('div');cell.className='cal-day'+(ds===today?' today':'');
+    cell.style.borderColor=borderMap[wtype]||'#F3F4F6';cell.style.borderWidth='2px';cell.style.borderStyle='solid';
     cell.onclick=()=>openDayModal(ds,d);
     const top=document.createElement('div');top.className='day-top';
     const num=document.createElement('div');num.className='day-num';num.textContent=d;top.appendChild(num);
@@ -343,282 +415,146 @@ function renderMonth(){
     grid.appendChild(cell);
   }
 }
-
 function renderMonthEvents(){
-  const section=document.getElementById('monthEventsSection');
-  section.innerHTML='';
-  const dim=new Date(curYear,curMonth+1,0).getDate();
-  const feries=[];
-  const evsList=[];
-
+  const section=document.getElementById('monthEventsSection');section.innerHTML='';
+  const dim=new Date(curYear,curMonth+1,0).getDate();const feries=[],evsList=[];
   for(let d=1;d<=dim;d++){
     const ds=curYear+'-'+String(curMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const wtype=getWorkType(ds);
-    const date=new Date(ds+'T12:00:00');
-    const dayName=DAYS[date.getDay()===0?6:date.getDay()-1];
-    if(wtype==='ferie'){
-      feries.push({ds,d,name:FERIE_NAMES[ds]||'Férié',dayName});
-    }
-    const dayEvs=getEventsForDay(ds);
-    dayEvs.forEach(ev=>evsList.push({...ev,d,dayName,wtype}));
+    const wtype=getWorkType(ds);const date=new Date(ds+'T12:00:00');const dayName=DAYS[date.getDay()===0?6:date.getDay()-1];
+    if(wtype==='ferie')feries.push({ds,d,name:FERIE_NAMES[ds]||'Férié',dayName});
+    getEventsForDay(ds).forEach(ev=>evsList.push({...ev,d,dayName,wtype}));
   }
-
   if(feries.length){
-    const title=document.createElement('div');title.className='month-events-title';title.textContent='🔴 Jours fériés du mois';
-    section.appendChild(title);
-    feries.forEach(f=>{
-      const row=document.createElement('div');row.className='ferie-row';
-      row.innerHTML='<div class="ferie-date">'+f.dayName.substring(0,3)+' '+f.d+'</div><div class="ferie-name">'+f.name+'</div>';
-      section.appendChild(row);
-    });
+    const title=document.createElement('div');title.className='month-events-title';title.textContent='🔴 Jours fériés du mois';section.appendChild(title);
+    feries.forEach(f=>{const row=document.createElement('div');row.className='ferie-row';row.innerHTML='<div class="ferie-date">'+f.dayName.substring(0,3)+' '+f.d+'</div><div class="ferie-name">'+f.name+'</div>';section.appendChild(row);});
   }
-
   if(evsList.length){
-    const title2=document.createElement('div');title2.className='month-events-title';title2.style.marginTop='14px';title2.textContent='📅 Événements famille du mois';
-    section.appendChild(title2);
+    const title2=document.createElement('div');title2.className='month-events-title';title2.style.marginTop='14px';title2.textContent='📅 Événements famille du mois';section.appendChild(title2);
     evsList.forEach(ev=>{
       const wb=getWorkBadge(ev.wtype);
       const row=document.createElement('div');row.className='month-event-row';
-      row.innerHTML='<div class="mer-date">'+ev.dayName.substring(0,3)+' '+ev.d+'</div>'
-        +'<div class="mer-info"><div class="mer-title">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'
-        +(ev.time_str?'<div class="mer-sub">⏰ '+ev.time_str+'</div>':'')
-        +(ev.description?'<div class="mer-sub">'+ev.description+'</div>':'')
-        +(wb.lbl?'<span class="mer-work '+wb.cls+'">'+wb.lbl+'</span>':'')
-        +'</div>';
-      // Boutons modifier/supprimer dans la vue mois
-      const actions=document.createElement('div');
-      actions.style.cssText='display:flex;flex-direction:column;gap:4px;';
-      const btnEdit=document.createElement('button');
-      btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.title='Modifier';
-      btnEdit.onclick=(e)=>{e.stopPropagation();openEditModal(ev.id);};
-      const btnDel=document.createElement('button');
-      btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.title='Supprimer';
-      btnDel.onclick=(e)=>{e.stopPropagation();deleteEvent(ev.id);};
-      actions.appendChild(btnEdit);actions.appendChild(btnDel);
-      row.appendChild(actions);
-      section.appendChild(row);
+      row.innerHTML='<div class="mer-date">'+ev.dayName.substring(0,3)+' '+ev.d+'</div><div class="mer-info"><div class="mer-title">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'+(ev.time_str?'<div class="mer-sub">⏰ '+ev.time_str+'</div>':'')+(ev.description?'<div class="mer-sub">'+ev.description+'</div>':'')+(wb.lbl?'<span class="mer-work '+wb.cls+'">'+wb.lbl+'</span>':'')+'</div>';
+      const actions=document.createElement('div');actions.style.cssText='display:flex;flex-direction:column;gap:4px;';
+      const btnEdit=document.createElement('button');btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.onclick=(e)=>{e.stopPropagation();openEditModal(ev.id);};
+      const btnDel=document.createElement('button');btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.onclick=(e)=>{e.stopPropagation();deleteEvent(ev.id);};
+      actions.appendChild(btnEdit);actions.appendChild(btnDel);row.appendChild(actions);section.appendChild(row);
     });
   }
-
-  if(!feries.length&&!evsList.length){
-    const empty=document.createElement('div');
-    empty.style.cssText='text-align:center;color:#D1D5DB;font-size:13px;padding:16px;font-weight:600;';
-    empty.textContent='Aucun événement ce mois-ci';
-    section.appendChild(empty);
-  }
+  if(!feries.length&&!evsList.length){const empty=document.createElement('div');empty.style.cssText='text-align:center;color:#D1D5DB;font-size:13px;padding:16px;font-weight:600;';empty.textContent='Aucun événement ce mois-ci';section.appendChild(empty);}
 }
-
 function renderWeek(){
   const container=document.getElementById('weekDays');container.innerHTML='';
   const today=toDS(new Date());
   for(let i=0;i<7;i++){
     const date=new Date(curWeekStart);date.setDate(date.getDate()+i);
-    const ds=toDS(date);const evs=getEventsForDay(ds);
-    const wtype=getWorkType(ds);const wb=getWeekBadge(wtype);
-    const dayEl=document.createElement('div');
-    dayEl.className='week-day'+(ds===today?' today-week':'');
+    const ds=toDS(date);const evs=getEventsForDay(ds);const wtype=getWorkType(ds);const wb=getWeekBadge(wtype);
+    const dayEl=document.createElement('div');dayEl.className='week-day'+(ds===today?' today-week':'');
     const hdr=document.createElement('div');hdr.className='week-day-header';
     const left=document.createElement('div');left.style.cssText='display:flex;align-items:center;gap:8px;';
     left.innerHTML='<span class="week-day-name">'+DAYS[i]+'</span><span class="week-day-date">'+date.getDate()+' '+MONTHS[date.getMonth()].substring(0,3)+'</span>';
     const badge=document.createElement('span');badge.className='week-day-badge '+wb.cls;badge.textContent=wb.lbl;
     hdr.appendChild(left);hdr.appendChild(badge);dayEl.appendChild(hdr);
     if(!evs.length){const e=document.createElement('div');e.className='no-events';e.textContent='Aucun événement';dayEl.appendChild(e);}
-    else{
-      evs.forEach(ev=>{
-        const el=document.createElement('div');el.className='week-event';
-        el.innerHTML='<span class="week-event-time">'+(ev.time_str||'--:--')+'</span>'
-          +'<div style="flex:1"><div style="font-size:13px;font-weight:700;">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'
-          +(ev.description?'<div style="font-size:11px;color:#9CA3AF">'+ev.description+'</div>':'')
-          +'</div>';
-        // Boutons modifier + supprimer
-        const btnEdit=document.createElement('button');
-        btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.title='Modifier';
-        btnEdit.onclick=()=>openEditModal(ev.id);
-        const btnDel=document.createElement('button');
-        btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.title='Supprimer';
-        btnDel.onclick=()=>deleteEvent(ev.id);
-        el.appendChild(btnEdit);el.appendChild(btnDel);
-        dayEl.appendChild(el);
-      });
-    }
+    else{evs.forEach(ev=>{
+      const el=document.createElement('div');el.className='week-event';
+      el.innerHTML='<span class="week-event-time">'+(ev.time_str||'--:--')+'</span><div style="flex:1"><div style="font-size:13px;font-weight:700;">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'+(ev.description?'<div style="font-size:11px;color:#9CA3AF">'+ev.description+'</div>':'')+'</div>';
+      const btnEdit=document.createElement('button');btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.onclick=()=>openEditModal(ev.id);
+      const btnDel=document.createElement('button');btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.onclick=()=>deleteEvent(ev.id);
+      el.appendChild(btnEdit);el.appendChild(btnDel);dayEl.appendChild(el);
+    });}
     const btn=document.createElement('button');
     btn.style.cssText='width:100%;margin-top:6px;padding:7px;background:#FCE7F3;border:none;border-radius:8px;color:#BE185D;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;';
     btn.textContent='+ Ajouter';btn.onclick=()=>{openAddModal();document.getElementById('evDate').value=ds;};
     dayEl.appendChild(btn);container.appendChild(dayEl);
   }
 }
-
-// ─── Ouvrir le modal en mode AJOUT ───────────────────────────────────────────
 function openAddModal(ds){
   editingEventId=null;
   document.getElementById('modalTitle').textContent='✏️ Nouvel événement';
-  document.getElementById('evTitle').value='';
-  document.getElementById('evDesc').value='';
+  document.getElementById('evTitle').value='';document.getElementById('evDesc').value='';
   document.getElementById('evDate').value=ds||toDS(new Date());
-  document.getElementById('evTime').value='';
-  document.getElementById('evType').value='task';
+  document.getElementById('evTime').value='';document.getElementById('evType').value='task';
   document.getElementById('modalOverlay').classList.add('show');
 }
-
-// ─── Ouvrir le modal en mode MODIFICATION ────────────────────────────────────
 function openEditModal(id){
-  const ev=events.find(e=>e.id===id);
-  if(!ev)return;
+  const ev=events.find(e=>e.id===id);if(!ev)return;
   editingEventId=id;
   document.getElementById('modalTitle').textContent='✏️ Modifier l\'événement';
-  document.getElementById('evTitle').value=ev.title||'';
-  document.getElementById('evDesc').value=ev.description||'';
-  document.getElementById('evDate').value=ev.date_str||'';
-  document.getElementById('evTime').value=ev.time_str||'';
+  document.getElementById('evTitle').value=ev.title||'';document.getElementById('evDesc').value=ev.description||'';
+  document.getElementById('evDate').value=ev.date_str||'';document.getElementById('evTime').value=ev.time_str||'';
   document.getElementById('evType').value=ev.type||'task';
   document.getElementById('modalOverlay').classList.add('show');
-  // Fermer le modal jour si ouvert
   document.getElementById('dayModalOverlay').classList.remove('show');
 }
-
 function closeModal(e){if(!e||e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('show');}
 
-// ─── Enregistrer (ajout OU modification) ─────────────────────────────────────
 async function saveEvent(){
   const title=document.getElementById('evTitle').value.trim();
   const date_str=document.getElementById('evDate').value;
   if(!title||!date_str)return alert('Titre et date obligatoires !');
-
   if(editingEventId){
-    // MODE MODIFICATION : delete + re-add avec les nouvelles valeurs
-    // (on supprime l'ancien et on recrée, car l'API n'a pas de update)
     try{
       await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id:editingEventId})});
-      const body={action:'add',title,description:document.getElementById('evDesc').value.trim(),date_str,time_str:document.getElementById('evTime').value||null,type:document.getElementById('evType').value,created_by:currentUser.email,created_by_name:currentUser.name};
+      const body={action:'add',title,description:document.getElementById('evDesc').value.trim(),date_str,time_str:document.getElementById('evTime').value||null,type:document.getElementById('evType').value,created_by:currentUser.email,created_by_name:currentUser.name,family_id:currentUser.family_id};
       const res=await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-      const data=await res.json();
-      events=events.filter(e=>e.id!==editingEventId);
-      events.push(data);
-      editingEventId=null;
-      closeModal();renderAll();
-    }catch(e){alert("Erreur lors de la modification");}
-  } else {
-    // MODE AJOUT
-    const body={action:'add',title,description:document.getElementById('evDesc').value.trim(),date_str,time_str:document.getElementById('evTime').value||null,type:document.getElementById('evType').value,created_by:currentUser.email,created_by_name:currentUser.name};
-    try{const res=await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    const data=await res.json();events.push(data);closeModal();renderAll();}
+      const data=await res.json();events=events.filter(e=>e.id!==editingEventId);events.push(data);editingEventId=null;closeModal();renderAll();
+    }catch(e){alert('Erreur lors de la modification');}
+  }else{
+    const body={action:'add',title,description:document.getElementById('evDesc').value.trim(),date_str,time_str:document.getElementById('evTime').value||null,type:document.getElementById('evType').value,created_by:currentUser.email,created_by_name:currentUser.name,family_id:currentUser.family_id};
+    try{const res=await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await res.json();events.push(data);closeModal();renderAll();}
     catch(e){alert("Erreur lors de l'ajout");}
   }
 }
-
 async function deleteEvent(id){
   if(!confirm('Supprimer ?'))return;
   await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id})});
   events=events.filter(e=>e.id!==id);renderAll();closeDayModal();
 }
-
 function openDayModal(ds,d){
-  selectedDay=ds;
-  const date=new Date(ds+'T12:00:00');
-  const wtype=getWorkType(ds);const wb=getWeekBadge(wtype);
+  selectedDay=ds;const date=new Date(ds+'T12:00:00');const wtype=getWorkType(ds);const wb=getWeekBadge(wtype);
   document.getElementById('dayModalTitle').textContent=DAYS[date.getDay()===0?6:date.getDay()-1]+' '+d+' '+MONTHS[date.getMonth()];
-  const badge=document.getElementById('dayModalBadge');
-  badge.textContent=wb.lbl;badge.className='day-modal-badge '+wb.cls;
-  const evs=getEventsForDay(ds);
-  const list=document.getElementById('dayEventsList');list.innerHTML='';
-  if(!evs.length){
-    list.innerHTML='<div style="text-align:center;color:#9CA3AF;font-size:13px;padding:16px">Aucun événement ce jour</div>';
-  } else {
-    evs.forEach(ev=>{
-      const el=document.createElement('div');el.className='day-event-item';
-      el.innerHTML='<div style="font-size:24px">'+(TYPE_ICONS[ev.type]||'📅')+'</div>'
-        +'<div class="day-event-info">'
-        +'<div class="day-event-title">'+ev.title+'</div>'
-        +(ev.time_str?'<div class="day-event-time">⏰ '+ev.time_str+'</div>':'')
-        +(ev.description?'<div class="day-event-desc">'+ev.description+'</div>':'')
-        +'<div class="day-event-by">Ajouté par '+(ev.created_by===currentUser.email?'vous':'votre partenaire')+'</div>'
-        +'</div>';
-      // Boutons modifier + supprimer dans le modal jour
-      const actions=document.createElement('div');
-      actions.className='day-event-actions';
-      const btnEdit=document.createElement('button');
-      btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.title='Modifier';
-      btnEdit.onclick=()=>openEditModal(ev.id);
-      const btnDel=document.createElement('button');
-      btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.title='Supprimer';
-      btnDel.onclick=()=>deleteEvent(ev.id);
-      actions.appendChild(btnEdit);actions.appendChild(btnDel);
-      el.appendChild(actions);
-      list.appendChild(el);
-    });
-  }
+  const badge=document.getElementById('dayModalBadge');badge.textContent=wb.lbl;badge.className='day-modal-badge '+wb.cls;
+  const evs=getEventsForDay(ds);const list=document.getElementById('dayEventsList');list.innerHTML='';
+  if(!evs.length){list.innerHTML='<div style="text-align:center;color:#9CA3AF;font-size:13px;padding:16px">Aucun événement ce jour</div>';}
+  else{evs.forEach(ev=>{
+    const el=document.createElement('div');el.className='day-event-item';
+    el.innerHTML='<div style="font-size:24px">'+(TYPE_ICONS[ev.type]||'📅')+'</div><div class="day-event-info"><div class="day-event-title">'+ev.title+'</div>'+(ev.time_str?'<div class="day-event-time">⏰ '+ev.time_str+'</div>':'')+(ev.description?'<div class="day-event-desc">'+ev.description+'</div>':'')+'<div class="day-event-by">Ajouté par '+(ev.created_by===currentUser.email?'vous':'votre partenaire')+'</div></div>';
+    const actions=document.createElement('div');actions.className='day-event-actions';
+    const btnEdit=document.createElement('button');btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.onclick=()=>openEditModal(ev.id);
+    const btnDel=document.createElement('button');btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.onclick=()=>deleteEvent(ev.id);
+    actions.appendChild(btnEdit);actions.appendChild(btnDel);el.appendChild(actions);list.appendChild(el);
+  });}
   document.getElementById('dayModalOverlay').classList.add('show');
 }
-
 function closeDayModal(e){if(!e||e.target===document.getElementById('dayModalOverlay'))document.getElementById('dayModalOverlay').classList.remove('show');}
 function addEventForDay(){closeDayModal();openAddModal(selectedDay);}
 
 function renderActivity(){
-  const section=document.getElementById('activitySection');
-  if(section)section.innerHTML='';
+  const section=document.getElementById('activitySection');if(section)section.innerHTML='';
   if(curView!=='journal')return;
-  const container=document.getElementById('journalView');
-  if(!container)return;
+  const container=document.getElementById('journalView');if(!container)return;
   container.innerHTML='';
-  const title=document.createElement('div');
-  title.style.cssText='font-size:11px;font-weight:800;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;';
-  title.textContent='📋 Journal des événements';
-  container.appendChild(title);
-  const btnClear=document.createElement('button');
-  btnClear.textContent='🗑️ Tout effacer';
-  btnClear.style.cssText='margin-bottom:12px;background:#FEF2F2;border:none;color:#EF4444;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;';
+  const title=document.createElement('div');title.style.cssText='font-size:11px;font-weight:800;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;';title.textContent='📋 Journal des événements';container.appendChild(title);
+  const btnClear=document.createElement('button');btnClear.textContent='🗑️ Tout effacer';btnClear.style.cssText='margin-bottom:12px;background:#FEF2F2;border:none;color:#EF4444;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;';
   btnClear.onclick=async()=>{if(!confirm('Supprimer tous les événements ?'))return;for(const ev of events){await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id:ev.id})});}events=[];renderAll();};
   container.appendChild(btnClear);
-  const sorted=[...events].sort((a,b)=>{
-    const da=new Date(a.created_at||'2000-01-01');
-    const db=new Date(b.created_at||'2000-01-01');
-    return db-da;
-  });
-  if(!sorted.length){
-    container.innerHTML+='<div style="text-align:center;color:#D1D5DB;font-size:13px;padding:24px;font-weight:600;">Aucun événement</div>';
-    return;
-  }
+  const sorted=[...events].sort((a,b)=>new Date(b.created_at||'2000-01-01')-new Date(a.created_at||'2000-01-01'));
+  if(!sorted.length){container.innerHTML+='<div style="text-align:center;color:#D1D5DB;font-size:13px;padding:24px;font-weight:600;">Aucun événement</div>';return;}
   sorted.forEach(ev=>{
-    const isMe=ev.created_by===currentUser.email;
-    const who=isMe?'👤 Vous':'👩 Laetitia';
-    const whoColor=isMe?'#3B82F6':'#EC4899';
+    const isMe=ev.created_by===currentUser.email;const who=isMe?'👤 Vous':'👩 Partenaire';const whoColor=isMe?'#3B82F6':'#EC4899';
     const dt=ev.created_at?new Date(ev.created_at).toLocaleString('fr-BE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'--';
-    const row=document.createElement('div');
-    row.style.cssText='background:white;border-radius:12px;padding:12px 14px;margin-bottom:8px;border-left:4px solid '+whoColor+';';
-    row.innerHTML='<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
-      +'<div style="font-size:13px;font-weight:800;">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'
-      +'<div style="font-size:10px;font-weight:700;color:'+whoColor+';">'+who+'</div>'
-      +'</div>'
-      +'<div style="font-size:11px;color:#9CA3AF;margin-top:4px;">📆 Pour le '+ev.date_str.split('-').reverse().join('/')+(ev.time_str?' à '+ev.time_str:'')+'</div>'
-      +'<div style="font-size:10px;color:#D1D5DB;margin-top:3px;">Ajouté le '+dt+'</div>'
-      +'<div style="display:flex;gap:6px;margin-top:8px;">'
-      +'</div>';
-    // Boutons modifier + supprimer dans le journal
+    const row=document.createElement('div');row.style.cssText='background:white;border-radius:12px;padding:12px 14px;margin-bottom:8px;border-left:4px solid '+whoColor+';';
+    row.innerHTML='<div style="display:flex;justify-content:space-between;align-items:flex-start;"><div style="font-size:13px;font-weight:800;">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div><div style="font-size:10px;font-weight:700;color:'+whoColor+';">'+who+'</div></div><div style="font-size:11px;color:#9CA3AF;margin-top:4px;">📆 Pour le '+ev.date_str.split('-').reverse().join('/')+(ev.time_str?' à '+ev.time_str:'')+'</div><div style="font-size:10px;color:#D1D5DB;margin-top:3px;">Ajouté le '+dt+'</div><div style="display:flex;gap:6px;margin-top:8px;"></div>';
     const actionsDiv=row.querySelector('div:last-child');
-    const btnEdit=document.createElement('button');
-    btnEdit.textContent='✏️ Modifier';
-    btnEdit.style.cssText='background:#EFF6FF;border:none;color:#3B82F6;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;';
-    btnEdit.onclick=()=>openEditModal(ev.id);
-    const btnDel=document.createElement('button');
-    btnDel.textContent='✕ Supprimer';
-    btnDel.style.cssText='background:#FEF2F2;border:none;color:#EF4444;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;';
-    btnDel.onclick=()=>deleteEvent(ev.id);
-    actionsDiv.appendChild(btnEdit);actionsDiv.appendChild(btnDel);
-    container.appendChild(row);
+    const btnEdit=document.createElement('button');btnEdit.textContent='✏️ Modifier';btnEdit.style.cssText='background:#EFF6FF;border:none;color:#3B82F6;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;';btnEdit.onclick=()=>openEditModal(ev.id);
+    const btnDel=document.createElement('button');btnDel.textContent='✕ Supprimer';btnDel.style.cssText='background:#FEF2F2;border:none;color:#EF4444;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;';btnDel.onclick=()=>deleteEvent(ev.id);
+    actionsDiv.appendChild(btnEdit);actionsDiv.appendChild(btnDel);container.appendChild(row);
   });
 }
 
 const saved=sessionStorage.getItem('agendaUser');
 if(saved){currentUser=JSON.parse(saved);showApp();}
-
-// Service Worker PWA
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(()=>console.log('PWA prête'))
-      .catch(err=>console.log('SW erreur:',err));
-  });
-}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/service-worker.js').then(()=>console.log('PWA prête')).catch(()=>{});});}
 </script>
 </body>
 </html>
