@@ -1,27 +1,34 @@
 import { kv } from '@vercel/kv';
 
 export default async function handler(req, res) {
-  // On force le support du JSON
-  const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-  const { action, family_id, id } = body;
+  // Gestion du CORS pour éviter les blocages navigateurs
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    // 1. LISTER LES ÉVÉNEMENTS
+    // Lecture sécurisée du corps de la requête
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const { action, family_id, id } = body;
+
+    // --- 1. LISTER LES ÉVÉNEMENTS ---
     if (action === 'list') {
-      // Si pas de family_id, on ne peut rien chercher
       if (!family_id) return res.status(200).json([]);
       
-      // On cherche toutes les clés qui commencent par event:
-      const keys = await kv.keys(`event:${family_id}:*`);
+      // On cherche toutes les clés liées à cette famille
+      const keys = await kv.keys(`ev:${family_id}:*`);
       if (!keys || keys.length === 0) return res.status(200).json([]);
       
       const events = await kv.mget(...keys);
+      // On trie pour ne garder que les données valides
       return res.status(200).json(events.filter(e => e !== null));
     }
 
-    // 2. AJOUTER UN ÉVÉNEMENT (AVEC RÉPÉTITION)
-    if (action === 'add') {
-      const { title, date_str, repeat_count, created_by, created_by_name } = body;
+    // --- 2. AJOUTER UN ÉVÉNEMENT ---
+    if (action === 'add' || action === 'update') {
+      const { title, date_str, repeat_count, created_by_name } = body;
       
       let iterations = 1;
       let unit = 'month';
@@ -38,7 +45,7 @@ export default async function handler(req, res) {
       const now = Date.now();
 
       for (let i = 0; i < iterations; i++) {
-        const eventId = `ev_${now}_${i}`;
+        const eventId = action === 'update' && i === 0 ? id : `e${now}${i}`;
         let eventDate = new Date(date_str + 'T12:00:00');
 
         if (unit === 'week') {
@@ -54,18 +61,20 @@ export default async function handler(req, res) {
           id: eventId,
           date_str: finalDateStr,
           created_at: new Date().toISOString(),
-          created_by_name: created_by_name || "Partenaire"
+          created_by_name: created_by_name || "Famille"
         };
 
-        await kv.set(`event:${family_id}:${eventId}`, newEvent);
+        // Sauvegarde avec une clé simplifiée "ev:family_id:event_id"
+        await kv.set(`ev:${family_id}:${eventId}`, newEvent);
         addedEvents.push(newEvent);
       }
       return res.status(200).json(addedEvents);
     }
 
-    // 3. SUPPRIMER UN ÉVÉNEMENT
+    // --- 3. SUPPRIMER UN ÉVÉNEMENT ---
     if (action === 'delete') {
-      const allKeys = await kv.keys(`event:*:${id}`);
+      // On scanne les clés pour trouver celle qui contient l'ID
+      const allKeys = await kv.keys(`ev:*:${id}`);
       for (const key of allKeys) {
         await kv.del(key);
       }
@@ -75,7 +84,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Action non reconnue' });
 
   } catch (error) {
-    console.error("Erreur KV:", error);
-    return res.status(500).json({ error: error.message });
+    console.error("Erreur Backend:", error);
+    return res.status(500).json({ error: "Erreur technique" });
   }
 }
