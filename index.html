@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Agenda Famille</title>
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#667eea">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F59E0B"> <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Agenda Famille">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+/* Tes styles restent identiques, j'ajoute juste une petite classe pour le journal */
 :root {
   --bg:#FFF8F0; --primary:#F59E0B; --primary2:#D97706; --accent:#EC4899;
   --text:#1F2937; --muted:#9CA3AF; --border:#F3F4F6;
@@ -142,6 +142,8 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .admin-empty{text-align:center;color:var(--muted);font-size:13px;padding:24px;font-weight:600;}
 .badge-pending{display:inline-block;background:#FEF3C7;color:#B45309;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;margin-left:4px;}
 .btn-invite-partner{background:#FCE7F3;border:none;color:#BE185D;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
+/* Ajout d'une ombre douce sur les cartes du journal */
+.journal-card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 </style>
 </head>
 <body>
@@ -240,6 +242,17 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
       <div class="modal-group"><label>Date *</label><input type="date" id="evDate"></div>
       <div class="modal-group"><label>Heure</label><input type="time" id="evTime"></div>
     </div>
+    
+    <div class="modal-group">
+      <label>Répétition mensuelle (ex: Engie)</label>
+      <select id="evRepeat">
+        <option value="1">Une seule fois</option>
+        <option value="3">Pendant 3 mois</option>
+        <option value="6">Pendant 6 mois</option>
+        <option value="12">Pendant 12 mois</option>
+      </select>
+    </div>
+
     <div class="modal-group">
       <label>Type</label>
       <select id="evType">
@@ -295,7 +308,19 @@ const FERMETURES=new Set();
 for(let d=24;d<=31;d++){if(d===28)continue;const dow=new Date(2026,6,d).getDay();if(dow===0||dow===6)continue;FERMETURES.add('2026-07-'+String(d).padStart(2,'0'));}
 FERMETURES.add('2026-11-02');
 
-// --- LOGIQUE INVITATION ---
+// --- FONCTION DATE INTELLIGENTE ---
+function formatSmartDate(dateStr) {
+    const d = new Date(dateStr + 'T12:00:00');
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    if (d.toDateString() === today.toDateString()) return "Aujourd'hui";
+    if (d.toDateString() === tomorrow.toDateString()) return "Demain";
+
+    return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+}
+
 window.onload = () => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
@@ -349,8 +374,6 @@ async function doInvite() {
         else { const d = await res.json(); alert(d.error); }
     } catch(e) { alert('Erreur'); }
 }
-
-// --- LOGIQUE EXISTANTE MODIFIÉE POUR PARTENAIRE ---
 
 function isoWeek(date){const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));const day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);const y=new Date(Date.UTC(d.getUTCFullYear(),0,1));return Math.ceil((((d-y)/86400000)+1)/7);}
 function getWorkType(ds){const date=new Date(ds+'T12:00:00');const dow=date.getDay();if(FERMETURES.has(ds))return'fermeture';if(FERIES.has(ds))return'ferie';if(dow===0||dow===6)return'we';return isoWeek(date)%2===0?'matin':'aprem';}
@@ -535,6 +558,7 @@ function openAddModal(ds){
   document.getElementById('evTitle').value='';document.getElementById('evDesc').value='';
   document.getElementById('evDate').value=ds||toDS(new Date());
   document.getElementById('evTime').value='';document.getElementById('evType').value='task';
+  document.getElementById('evRepeat').value='1'; // On remet à 1 par défaut
   document.getElementById('modalOverlay').classList.add('show');
 }
 function openEditModal(id){
@@ -544,6 +568,7 @@ function openEditModal(id){
   document.getElementById('evTitle').value=ev.title||'';document.getElementById('evDesc').value=ev.description||'';
   document.getElementById('evDate').value=ev.date_str||'';document.getElementById('evTime').value=ev.time_str||'';
   document.getElementById('evType').value=ev.type||'task';
+  document.getElementById('evRepeat').value='1'; // On cache ou fige la répétition en mode edit
   document.getElementById('modalOverlay').classList.add('show');
 }
 function closeModal(e){if(!e||e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('show');}
@@ -551,6 +576,8 @@ function closeModal(e){if(!e||e.target===document.getElementById('modalOverlay')
 async function saveEvent(){
   const title=document.getElementById('evTitle').value.trim();
   const date_str=document.getElementById('evDate').value;
+  const repeat_count=document.getElementById('evRepeat').value; // RÉCUPÉRATION DU COMPTEUR
+
   if(!title||!date_str)return alert('Titre et date obligatoires !');
   const body={
       action: editingEventId ? 'update' : 'add',
@@ -558,6 +585,7 @@ async function saveEvent(){
       title,
       description: document.getElementById('evDesc').value.trim(),
       date_str,
+      repeat_count, // ENVOI À L'API
       time_str: document.getElementById('evTime').value||null,
       type: document.getElementById('evType').value,
       created_by: currentUser.email,
@@ -595,10 +623,15 @@ function addEventForDay(){closeDayModal();openAddModal(selectedDay);}
 function renderActivity(){
   const container=document.getElementById('journalView');if(!container)return;
   container.innerHTML='<div class="month-events-title">📋 Activité récente</div>';
-  const sorted=[...events].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
-  sorted.slice(0,10).forEach(ev=>{
-    const row=document.createElement('div');row.className='month-event-row';
-    row.innerHTML='<div class="mer-info"><div class="mer-title">'+ev.title+'</div><div class="mer-sub">Pour le '+ev.date_str+'</div></div>';
+  const sorted=[...events].sort((a,b)=>new Date(b.date_str)-new Date(a.date_str)); // Tri par date réelle
+  
+  // Filtrer pour ne garder que le futur ou aujourd'hui
+  const todayStr = toDS(new Date());
+  const futureEvents = sorted.filter(ev => ev.date_str >= todayStr);
+
+  futureEvents.slice(0,15).forEach(ev=>{
+    const row=document.createElement('div');row.className='month-event-row journal-card';
+    row.innerHTML='<div class="mer-info"><div class="mer-title">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div><div class="mer-sub" style="font-weight:800; color:var(--primary2)">'+formatSmartDate(ev.date_str)+'</div></div>';
     container.appendChild(row);
   });
 }
