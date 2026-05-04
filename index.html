@@ -2,157 +2,158 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Agenda Famille</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root { --bg:#FFF8F0; --p:#F59E0B; --p2:#D97706; --txt:#1F2937; --m:#9CA3AF; --b:#F3F4F6; }
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Nunito',sans-serif;}
-body{background:var(--bg);color:var(--txt);min-height:100vh;}
-.auth-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,#FFF8F0,#FEF3C7);}
-.auth-card{background:white;border-radius:24px;padding:30px 20px;width:100%;max-width:380px;box-shadow:0 10px 30px rgba(0,0,0,0.1);text-align:center;}
-.form-group{margin-bottom:15px;text-align:left;}
-.form-group label{display:block;font-size:11px;color:var(--m);margin-bottom:4px;font-weight:700;text-transform:uppercase;}
-.form-group input, .form-group select{width:100%;background:#F9FAFB;border:2px solid #F3F4F6;border-radius:12px;padding:12px;font-size:14px;outline:none;}
-.btn{width:100%;padding:14px;background:var(--p);border:none;border-radius:12px;color:white;font-weight:800;cursor:pointer;margin-top:10px;}
+:root { --bg:#FFF8F0; --primary:#F59E0B; --primary2:#D97706; --accent:#EC4899; --text:#1F2937; --muted:#9CA3AF; --border:#F3F4F6; }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.auth-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;flex-direction:column;gap:16px;background:linear-gradient(135deg,#FFF8F0,#FEF3C7,#FCE7F3);}
+.auth-card{background:white;border-radius:24px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.1);}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase;}
+.form-group input{width:100%;background:#F9FAFB;border:2px solid #F3F4F6;border-radius:12px;padding:12px 14px;outline:none;}
+.btn-login{width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--primary2));border:none;border-radius:12px;color:white;font-weight:800;cursor:pointer;}
 .app-wrap{display:none;}
-.topbar{background:white;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(0,0,0,0.05);}
-.v-tabs{display:flex;gap:8px;padding:15px 16px;}
-.v-tabs button{flex:1;padding:10px;border-radius:12px;border:2px solid var(--b);background:white;font-weight:700;color:var(--m);}
-.v-tabs button.active{background:var(--p);color:white;border-color:var(--p);}
-.month-nav{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;font-weight:900;}
+.topbar{background:white;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(0,0,0,0.06);position:sticky;top:0;z-index:50;}
+.view-tabs{display:flex;gap:8px;padding:14px 16px;}
+.vtab{flex:1;padding:10px;border-radius:12px;border:2px solid var(--border);background:white;font-weight:700;cursor:pointer;color:var(--muted);text-align:center;}
+.vtab.active{background:var(--primary);border-color:var(--primary);color:white;}
+.month-nav{display:flex;align-items:center;padding:14px 16px;justify-content:space-between;}
+.month-label{font-size:18px;font-weight:900;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 16px;}
-.cal-day{background:white;border-radius:10px;height:70px;padding:5px;position:relative;}
-.event-dot{height:5px;width:5px;background:#EC4899;border-radius:50%;margin:2px auto;}
-.fab{position:fixed;bottom:25px;right:20px;width:56px;height:56px;background:var(--p);border-radius:50%;border:none;color:white;font-size:30px;box-shadow:0 5px 15px rgba(0,0,0,0.2);}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+.cal-day{background:white;border-radius:10px;height:76px;padding:5px;border:2px solid transparent;position:relative;}
+.day-num{font-size:11px;font-weight:800;}
+.event-item{font-size:7px;font-weight:700;color:#BE185D;background:#FCE7F3;border-radius:3px;padding:1px 3px;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;background:linear-gradient(135deg,var(--primary),var(--accent));border:none;border-radius:50%;color:white;font-size:28px;box-shadow:0 8px 24px rgba(245,158,11,0.4);z-index:100;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:20px;}
 .modal-overlay.show{display:flex;}
-.modal{background:white;border-radius:20px;padding:20px;width:100%;max-width:400px;}
+.modal{background:white;border-radius:24px;padding:24px;width:100%;max-width:400px;}
+.modal select, .modal input{width:100%;background:#F9FAFB;border:2px solid #F3F4F6;border-radius:12px;padding:11px 14px;margin-top:5px;outline:none;font-family:inherit;}
 </style>
 </head>
 <body>
 
-<div id="authWrap" class="auth-wrap">
+<div class="auth-wrap" id="authWrap">
   <div class="auth-card">
-    <h2 style="margin-bottom:20px">👨‍👩‍👧 Agenda Famille</h2>
-    <div class="form-group"><label>Email</label><input type="email" id="email" placeholder="votre@email.com"></div>
-    <div class="form-group"><label>Mot de passe</label><input type="password" id="pass" placeholder="••••••••"></div>
-    <button class="btn" onclick="doLogin()">Se connecter 🚀</button>
+    <h2 style="text-align:center;margin-bottom:20px;">Agenda Famille</h2>
+    <div class="form-group"><label>Email</label><input type="email" id="loginEmail"></div>
+    <div class="form-group"><label>Mot de passe</label><input type="password" id="loginPassword"></div>
+    <button class="btn-login" onclick="doLogin()">Se connecter</button>
   </div>
 </div>
 
-<div id="appWrap" class="app-wrap">
-  <div class="topbar">
-    <div id="uName" style="font-weight:800">Prénom</div>
-    <button onclick="doLogout()" style="background:none;border:none;color:red;font-weight:700">Déconnexion</button>
+<div class="app-wrap" id="appWrap">
+  <div class="topbar"><div id="topName" style="font-weight:800">Prénom</div><button onclick="doLogout()" style="border:none;color:red;background:none;font-weight:700;">Déconnexion</button></div>
+  <div class="view-tabs"><div class="vtab active" id="tabMonth" onclick="setView('month')">Mois</div><div class="vtab" id="tabJournal" onclick="setView('journal')">Journal</div></div>
+  <div id="monthSection">
+    <div class="month-nav"><button onclick="changeMonth(-1)">‹</button><div class="month-label" id="monthLabel"></div><button onclick="changeMonth(1)">›</button></div>
+    <div class="cal-grid" id="calGrid"></div>
   </div>
-  <div class="v-tabs">
-    <button id="bM" class="active" onclick="tab('m')">Calendrier</button>
-    <button id="bJ" onclick="tab('j')">Journal</button>
-  </div>
-  <div id="mView">
-    <div class="month-nav"><button onclick="chMonth(-1)">‹</button><div id="mLab"></div><button onclick="chMonth(1)">›</button></div>
-    <div class="cal-grid" id="grid"></div>
-  </div>
-  <div id="jView" style="display:none;padding:20px"></div>
-  <button class="fab" onclick="document.getElementById('ov').classList.add('show')">+</button>
+  <div id="journalSection" style="display:none;padding:16px;"></div>
+  <button class="fab" onclick="openModal()">+</button>
 </div>
 
-<div id="ov" class="modal-overlay" onclick="this.classList.remove('show')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h3 style="margin-bottom:15px">Nouvel événement</h3>
-    <div class="form-group"><label>Titre</label><input type="text" id="eTit"></div>
-    <div class="form-group"><label>Date</label><input type="date" id="eDat"></div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Nouvel événement</h3>
+    <div class="form-group"><label>Titre</label><input type="text" id="evTitle"></div>
+    <div class="form-group"><label>Date</label><input type="date" id="evDate"></div>
     <div class="form-group">
-      <label>Répétition</label>
-      <select id="eRep">
-        <option value="1">Une fois</option>
-        <option value="w2">2 semaines</option><option value="w4">4 semaines</option>
-        <option value="2">2 mois</option><option value="3">3 mois</option><option value="6">6 mois</option><option value="12">12 mois</option>
+      <label>Répétition mensuelle</label>
+      <select id="evRepeat">
+        <option value="1">Une seule fois</option>
+        <option value="2">Pendant 2 mois</option>
+        <option value="3">Pendant 3 mois</option>
+        <option value="4">Pendant 4 mois</option>
+        <option value="5">Pendant 5 mois</option>
+        <option value="6">Pendant 6 mois</option>
+        <option value="7">Pendant 7 mois</option>
+        <option value="8">Pendant 8 mois</option>
+        <option value="9">Pendant 9 mois</option>
+        <option value="10">Pendant 10 mois</option>
+        <option value="11">Pendant 11 mois</option>
+        <option value="12">Pendant 12 mois (1 an)</option>
       </select>
     </div>
-    <button class="btn" onclick="addE()">Enregistrer 💾</button>
+    <button class="btn-login" onclick="saveEvent()">Enregistrer</button>
+    <button onclick="closeModal()" style="width:100%;margin-top:10px;background:none;border:none;color:var(--muted);">Annuler</button>
   </div>
 </div>
 
 <script>
-let user = null; let events = []; let now = new Date();
-const months = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+let currentUser=null, events=[], curDate=new Date();
+const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
-window.onload = () => {
-  const s = sessionStorage.getItem('u');
-  if(s) { user = JSON.parse(s); start(); }
-};
+window.onload=()=>{ const s=sessionStorage.getItem('agendaUser'); if(s){currentUser=JSON.parse(s);showApp();} };
 
-async function doLogin() {
-  const email = document.getElementById('email').value.toLowerCase().trim();
-  const password = document.getElementById('pass').value;
-  try {
-    const r = await fetch('/api/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'login', email, password}) });
-    const d = await r.json();
-    if(r.ok) { user = d; sessionStorage.setItem('u', JSON.stringify(d)); start(); }
-    else alert(d.error || "Erreur de connexion");
-  } catch(e) { alert("Serveur injoignable"); }
+function showApp(){
+  document.getElementById('authWrap').style.display='none';
+  document.getElementById('appWrap').style.display='block';
+  document.getElementById('topName').textContent=currentUser.name;
+  loadEvents();
 }
 
-function doLogout() { sessionStorage.clear(); location.reload(); }
-
-function start() {
-  document.getElementById('authWrap').style.display = 'none';
-  document.getElementById('appWrap').style.display = 'block';
-  document.getElementById('uName').textContent = user.name;
-  load();
+async function doLogin(){
+  const email=document.getElementById('loginEmail').value;
+  const password=document.getElementById('loginPassword').value;
+  const res=await fetch('/api/auth',{method:'POST', body:JSON.stringify({action:'login',email,password})});
+  const data=await res.json();
+  if(res.ok){currentUser=data;sessionStorage.setItem('agendaUser',JSON.stringify(data));showApp();}
+  else alert(data.error);
 }
 
-async function load() {
-  try {
-    const r = await fetch('/api/events', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'list', family_id: user.family_id}) });
-    events = await r.json();
-    draw();
-  } catch(e) {}
+function doLogout(){sessionStorage.clear();location.reload();}
+
+async function loadEvents(){
+  const res=await fetch('/api/events',{method:'POST', body:JSON.stringify({action:'list',family_id:currentUser.family_id})});
+  events=await res.json();
+  render();
 }
 
-async function addE() {
-  const title = document.getElementById('eTit').value;
-  const date_str = document.getElementById('eDat').value;
-  const repeat_count = document.getElementById('eRep').value;
-  if(!title || !date_str) return alert("Remplir titre et date");
-  
-  await fetch('/api/events', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'add', family_id:user.family_id, title, date_str, repeat_count, created_by_name:user.name}) });
-  document.getElementById('ov').classList.remove('show');
-  load();
+async function saveEvent(){
+  const title=document.getElementById('evTitle').value;
+  const date_str=document.getElementById('evDate').value;
+  const repeat_count=document.getElementById('evRepeat').value;
+  if(!title||!date_str)return;
+  await fetch('/api/events',{method:'POST', body:JSON.stringify({action:'add',family_id:currentUser.family_id,title,date_str,repeat_count,created_by_name:currentUser.name})});
+  closeModal(); loadEvents();
 }
 
-function draw() {
-  const g = document.getElementById('grid'); g.innerHTML = '';
-  const y = now.getFullYear(); const m = now.getMonth();
-  document.getElementById('mLab').textContent = months[m] + ' ' + y;
-  const first = new Date(y, m, 1).getDay() || 7;
-  const last = new Date(y, m+1, 0).getDate();
+function render(){
+  const grid=document.getElementById('calGrid'); grid.innerHTML='';
+  const y=curDate.getFullYear(), m=curDate.getMonth();
+  document.getElementById('monthLabel').textContent=MONTHS[m]+' '+y;
+  const firstDay=new Date(y,m,1).getDay()||7;
+  const days=new Date(y,m+1,0).getDate();
 
-  for(let i=1; i<first; i++) g.appendChild(document.createElement('div'));
-  for(let d=1; d<=last; d++) {
-    const day = document.createElement('div'); day.className = 'cal-day';
-    day.innerHTML = `<div style="font-size:12px;font-weight:bold">${d}</div>`;
-    const ds = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-    events.filter(e => e.date_str === ds).forEach(() => {
-      const dot = document.createElement('div'); dot.className = 'event-dot'; day.appendChild(dot);
+  for(let i=1;i<firstDay;i++) grid.appendChild(document.createElement('div'));
+  for(let d=1;d<=days;d++){
+    const ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const cell=document.createElement('div'); cell.className='cal-day';
+    cell.innerHTML=`<div class="day-num">${d}</div>`;
+    events.filter(e=>e.date_str===ds).forEach(e=>{
+      cell.innerHTML+=`<div class="event-item">${e.title}</div>`;
     });
-    g.appendChild(day);
+    grid.appendChild(cell);
   }
-  const j = document.getElementById('jView'); j.innerHTML = '<h3>Activités</h3>';
-  events.slice().reverse().slice(0,10).forEach(e => {
-    j.innerHTML += `<div style="background:white;padding:10px;border-radius:10px;margin-top:10px;border-left:4px solid var(--p)"><b>${e.title}</b><br><small>${e.date_str} par ${e.created_by_name}</small></div>`;
+  const journal=document.getElementById('journalSection');
+  journal.innerHTML='<h3>Journal</h3>';
+  events.slice().reverse().slice(0,10).forEach(e=>{
+    journal.innerHTML+=`<div style="background:white;padding:10px;border-radius:10px;margin-top:10px;"><b>${e.title}</b><br><small>${e.date_str}</small></div>`;
   });
 }
 
-function tab(v) {
-  document.getElementById('mView').style.display = v==='m'?'block':'none';
-  document.getElementById('jView').style.display = v==='j'?'block':'none';
-  document.getElementById('bM').className = v==='m'?'active':'';
-  document.getElementById('bJ').className = v==='j'?'active':'';
+function setView(v){
+  document.getElementById('monthSection').style.display=v==='month'?'block':'none';
+  document.getElementById('journalSection').style.display=v==='journal'?'block':'none';
+  document.getElementById('tabMonth').className=v==='month'?'vtab active':'vtab';
+  document.getElementById('tabJournal').className=v==='journal'?'vtab active':'vtab';
 }
-function chMonth(s) { now.setMonth(now.getMonth() + s); draw(); }
+function changeMonth(s){curDate.setMonth(curDate.getMonth()+s);render();}
+function openModal(){document.getElementById('modalOverlay').classList.add('show');}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('show');}
 </script>
 </body>
 </html>
