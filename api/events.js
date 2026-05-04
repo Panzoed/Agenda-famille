@@ -1,56 +1,49 @@
 import { kv } from '@vercel/kv';
 
 export default async function handler(req, res) {
-  // Cette ligne est la clé : elle accepte les deux formats (texte ou objet)
+  // Cette ligne permet de lire les données envoyées par ton index.html
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-  const { action, family_id, id, title, description, date_str, time_str, type, repeat_count, created_by, created_by_name } = body;
+  const { action, family_id, id } = body;
 
   try {
-    // RETROUVER TES ÉVÉNEMENTS
+    // RECHERCHE SIMPLE DES ÉVÉNEMENTS
     if (action === 'list') {
-      const keys = await kv.keys(`event:${family_id}:*`);
+      // On récupère toutes les clés qui commencent par "event:"
+      const keys = await kv.keys('event:*');
       if (keys.length === 0) return res.status(200).json([]);
-      const evs = await kv.mget(...keys);
-      return res.status(200).json(evs.filter(e => e != null));
+      
+      const allEvents = await kv.mget(...keys);
+      // On ne garde que ceux qui appartiennent à ta famille
+      const filtered = allEvents.filter(e => e && e.family_id === family_id);
+      
+      return res.status(200).json(filtered);
     }
 
-    // AJOUTER (Avec ta demande de répétition mensuelle)
+    // AJOUT SIMPLE
     if (action === 'add') {
-      const count = parseInt(repeat_count) || 1;
-      const baseId = Date.now();
-      for (let i = 0; i < count; i++) {
-        const evId = `${baseId}_${i}`;
-        let d = new Date(date_str + 'T12:00:00');
-        d.setMonth(d.getMonth() + i);
-        const newDate = d.toISOString().split('T')[0];
-
-        const newEv = {
-          id: evId, family_id, title, description,
-          date_str: newDate, time_str, type,
-          created_by, created_by_name,
-          created_at: new Date().toISOString()
-        };
-        await kv.set(`event:${family_id}:${evId}`, newEv);
-      }
+      const eventId = body.id || Date.now().toString();
+      // On enregistre avec la clé simple "event:ID"
+      await kv.set(`event:${eventId}`, {
+        ...body,
+        id: eventId,
+        created_at: new Date().toISOString()
+      });
       return res.status(200).json({ success: true });
     }
 
-    // SUPPRIMER
+    // SUPPRESSION SIMPLE
     if (action === 'delete') {
-      await kv.del(`event:${family_id}:${id}`);
+      await kv.del(`event:${id}`);
       return res.status(200).json({ success: true });
     }
 
-    // MODIFIER
+    // MISE À JOUR SIMPLE
     if (action === 'update') {
-      const key = `event:${family_id}:${id}`;
-      const existing = await kv.get(key);
-      const updated = { ...existing, title, description, date_str, time_str, type };
-      await kv.set(key, updated);
-      return res.status(200).json(updated);
+      await kv.set(`event:${id}`, { ...body });
+      return res.status(200).json({ success: true });
     }
 
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 }
