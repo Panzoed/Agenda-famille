@@ -1,82 +1,60 @@
 import { kv } from '@vercel/kv';
 
 export default async function handler(req, res) {
-  // Gestion du CORS pour éviter les blocages navigateurs
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') return res.status(200).end();
-
   try {
-    // Lecture sécurisée du corps de la requête
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const { action, family_id, id } = body;
+    const { action, family_id, id, title, description, date_str, time_str, type, repeat_count, created_by, created_by_name } = req.body;
 
-    // --- 1. LISTER LES ÉVÉNEMENTS ---
+    // 1. LISTER LES ÉVÉNEMENTS
     if (action === 'list') {
-      if (!family_id) return res.status(200).json([]);
-      
-      // On cherche toutes les clés liées à cette famille
-      const keys = await kv.keys(`ev:${family_id}:*`);
+      if (!family_id) return res.status(400).json({ error: 'family_id manquant' });
+      const keys = await kv.keys(`event:${family_id}:*`);
       if (!keys || keys.length === 0) return res.status(200).json([]);
-      
       const events = await kv.mget(...keys);
-      // On trie pour ne garder que les données valides
       return res.status(200).json(events.filter(e => e !== null));
     }
 
-    // --- 2. AJOUTER UN ÉVÉNEMENT ---
+    // 2. AJOUTER / MODIFIER
     if (action === 'add' || action === 'update') {
-      const { title, date_str, repeat_count, created_by_name } = body;
-      
-      let iterations = 1;
-      let unit = 'month';
-      const repeatVal = String(repeat_count || "1");
-
-      if (repeatVal.startsWith('w')) {
-        unit = 'week';
-        iterations = parseInt(repeatVal.replace('w', '')) || 1;
-      } else {
-        iterations = parseInt(repeatVal) || 1;
-      }
-
+      const iterations = parseInt(repeat_count) || 1;
+      const baseTimestamp = Date.now();
       const addedEvents = [];
-      const now = Date.now();
 
       for (let i = 0; i < iterations; i++) {
-        const eventId = action === 'update' && i === 0 ? id : `e${now}${i}`;
-        let eventDate = new Date(date_str + 'T12:00:00');
-
-        if (unit === 'week') {
-          eventDate.setDate(eventDate.getDate() + (i * 7));
-        } else {
-          eventDate.setMonth(eventDate.getMonth() + i);
-        }
-
-        const finalDateStr = eventDate.toISOString().split('T')[0];
+        // Si c'est un update, on garde l'ID existant pour le premier, sinon on crée
+        const eventId = (action === 'update' && i === 0) ? id : `ev_${baseTimestamp}_${i}`;
         
-        const newEvent = {
-          ...body,
+        let eventDate = new Date(date_str + 'T12:00:00');
+        eventDate.setMonth(eventDate.getMonth() + i); // Répétition mensuelle
+        const finalDateStr = eventDate.toISOString().split('T')[0];
+
+        const eventData = {
           id: eventId,
+          family_id,
+          title,
+          description: description || "",
           date_str: finalDateStr,
-          created_at: new Date().toISOString(),
-          created_by_name: created_by_name || "Famille"
+          time_str: time_str || null,
+          type: type || "task",
+          created_by: created_by || "Inconnu",
+          created_by_name: created_by_name || "Membre",
+          created_at: new Date().toISOString()
         };
 
-        // Sauvegarde avec une clé simplifiée "ev:family_id:event_id"
-        await kv.set(`ev:${family_id}:${eventId}`, newEvent);
-        addedEvents.push(newEvent);
+        await kv.set(`event:${family_id}:${eventId}`, eventData);
+        addedEvents.push(eventData);
       }
       return res.status(200).json(addedEvents);
     }
 
-    // --- 3. SUPPRIMER UN ÉVÉNEMENT ---
+    // 3. SUPPRIMER
     if (action === 'delete') {
-      // On scanne les clés pour trouver celle qui contient l'ID
-      const allKeys = await kv.keys(`ev:*:${id}`);
-      for (const key of allKeys) {
-        await kv.del(key);
+      if (!id) return res.status(400).json({ error: 'ID manquant' });
+      // On cherche la clé exacte dans la base
+      const allKeys = await kv.keys(`event:*:${id}`);
+      if (allKeys && allKeys.length > 0) {
+        for (const key of allKeys) {
+          await kv.del(key);
+        }
       }
       return res.status(200).json({ success: true });
     }
@@ -84,7 +62,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Action non reconnue' });
 
   } catch (error) {
-    console.error("Erreur Backend:", error);
-    return res.status(500).json({ error: "Erreur technique" });
+    console.error("Erreur API Events:", error);
+    return res.status(500).json({ error: 'Erreur interne' });
   }
 }
