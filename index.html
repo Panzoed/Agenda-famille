@@ -123,7 +123,6 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .day-event-info{flex:1;}
 .day-event-title{font-size:14px;font-weight:800;}
 .day-event-time{font-size:11px;color:var(--muted);margin-top:2px;}
-.day-event-desc{font-size:12px;color:#6B7280;margin-top:2px;}
 .day-event-by{font-size:10px;color:var(--primary2);font-weight:700;margin-top:2px;}
 .day-event-actions{display:flex;flex-direction:column;gap:4px;}
 .btn-add-day{width:100%;padding:12px;background:linear-gradient(135deg,var(--primary),var(--accent));border:none;border-radius:12px;color:white;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;}
@@ -142,6 +141,8 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .admin-empty{text-align:center;color:var(--muted);font-size:13px;padding:24px;font-weight:600;}
 .badge-pending{display:inline-block;background:#FEF3C7;color:#B45309;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;margin-left:4px;}
 .btn-invite-partner{background:#FCE7F3;border:none;color:#BE185D;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
+
+/* Nouveau styles Journal */
 .journal-card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.1s; border-radius: 16px; }
 .journal-card:active { transform: scale(0.98); }
 </style>
@@ -228,7 +229,6 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
   </div>
   <div class="month-events-section" id="monthEventsSection"></div>
   <div class="week-view" id="weekView" style="display:none"><div id="weekDays"></div></div>
-  <div class="activity-section" id="activitySection"></div>
   <div class="journal-view" id="journalView" style="display:none;padding:0 16px 16px;"></div>
   <button class="fab" onclick="openAddModal()">+</button>
 </div>
@@ -400,7 +400,7 @@ async function doRegister(){
   if(!name||!email||!password||!family_name)return showError('Tous les champs sont obligatoires');
   try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'register',name,email,password,family_name,partner_email})});
   const data=await res.json();if(!res.ok)return showError(data.error||'Erreur');
-  showSuccess('✅ Demande envoyée ! Emmanuel va approuver votre compte. Vous recevrez un email.');
+  showSuccess('✅ Demande envoyée ! Emmanuel va approuver votre compte.');
   setTimeout(()=>showLogin(),3000);}
   catch(e){showError('Erreur réseau');}
 }
@@ -456,6 +456,7 @@ async function loadEvents(){
 }
 
 function getEventsForDay(ds){return events.filter(e=>e.date_str===ds);}
+
 function setView(view){
   curView=view;
   document.getElementById('tabMonth').className='vtab'+(view==='month'?' active':'');
@@ -472,16 +473,19 @@ function setView(view){
   document.getElementById('journalView').style.display=view==='journal'?'block':'none';
   renderAll();
 }
+
 function changeMonth(dir){
   if(curView==='month'){curMonth+=dir;if(curMonth<0){curMonth=11;curYear--;}if(curMonth>11){curMonth=0;curYear++;}}
   else{curWeekStart=new Date(curWeekStart);curWeekStart.setDate(curWeekStart.getDate()+dir*7);}
   renderAll();
 }
+
 function renderAll(){
   if(curView==='month'){document.getElementById('monthLabel').textContent=MONTHS[curMonth]+' '+curYear;renderMonth();renderMonthEvents();renderActivity();}
   else if(curView==='week'){const end=new Date(curWeekStart);end.setDate(end.getDate()+6);document.getElementById('monthLabel').textContent=curWeekStart.getDate()+' → '+end.getDate()+' '+MONTHS[end.getMonth()];renderWeek();renderActivity();}
   else if(curView==='journal'){document.getElementById('monthLabel').textContent='Journal';renderActivity();}
 }
+
 function renderMonth(){
   const grid=document.getElementById('calGrid');grid.innerHTML='';
   const today=toDS(new Date());
@@ -503,6 +507,7 @@ function renderMonth(){
     grid.appendChild(cell);
   }
 }
+
 function renderMonthEvents(){
   const section=document.getElementById('monthEventsSection');section.innerHTML='';
   const dim=new Date(curYear,curMonth+1,0).getDate();const feries=[],evsList=[];
@@ -529,6 +534,7 @@ function renderMonthEvents(){
     });
   }
 }
+
 function renderWeek(){
   const container=document.getElementById('weekDays');container.innerHTML='';
   const today=toDS(new Date());
@@ -560,6 +566,7 @@ function openAddModal(ds){
   document.getElementById('evRepeat').value='1';
   document.getElementById('modalOverlay').classList.add('show');
 }
+
 function openEditModal(id){
   const ev=events.find(e=>e.id===id);if(!ev)return;
   editingEventId=id;
@@ -570,6 +577,7 @@ function openEditModal(id){
   document.getElementById('evRepeat').value='1';
   document.getElementById('modalOverlay').classList.add('show');
 }
+
 function closeModal(e){if(!e||e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('show');}
 
 async function saveEvent(){
@@ -595,18 +603,20 @@ async function saveEvent(){
       closeModal();loadEvents();
   } catch(e) { alert('Erreur'); }
 }
+
 async function deleteEvent(id){
   if(!confirm('Supprimer ?'))return;
   await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id})});
   loadEvents();
 }
+
 function openDayModal(ds,d){
   selectedDay=ds;const date=new Date(ds+'T12:00:00');const wtype=getWorkType(ds);const wb=getWeekBadge(wtype);
   document.getElementById('dayModalTitle').textContent=DAYS[date.getDay()===0?6:date.getDay()-1]+' '+d+' '+MONTHS[date.getMonth()];
   const badge=document.getElementById('dayModalBadge');badge.textContent=wb.lbl;badge.className='day-modal-badge '+wb.cls;
   const evs=getEventsForDay(ds);const list=document.getElementById('dayEventsList');list.innerHTML='';
   evs.forEach(ev=>{
-    const addedBy = ev.created_by === currentUser.email ? 'vous' : (ev.created_by_name || 'votre partenaire');
+    const addedBy = ev.created_by === currentUser.email ? 'vous' : (ev.created_by_name || 'Laetitia');
     const el=document.createElement('div');el.className='day-event-item';
     el.innerHTML='<div style="font-size:24px">'+(TYPE_ICONS[ev.type]||'📅')+'</div><div class="day-event-info"><div class="day-event-title">'+ev.title+'</div>'+(ev.time_str?'<div class="day-event-time">⏰ '+ev.time_str+'</div>':'')+'<div class="day-event-by">Ajouté par '+addedBy+'</div></div>';
     const actions=document.createElement('div');actions.className='day-event-actions';
@@ -616,6 +626,7 @@ function openDayModal(ds,d){
   });
   document.getElementById('dayModalOverlay').classList.add('show');
 }
+
 function closeDayModal(e){if(!e||e.target===document.getElementById('dayModalOverlay'))document.getElementById('dayModalOverlay').classList.remove('show');}
 function addEventForDay(){closeDayModal();openAddModal(selectedDay);}
 
@@ -629,13 +640,23 @@ function renderActivity(){
   sortedByCreation.slice(0,15).forEach(ev=>{
     const row=document.createElement('div');row.className='month-event-row journal-card';
     const eventDateDisplay = formatSmartDate(ev.date_str);
-    const addedBy = ev.created_by === currentUser.email ? 'Moi' : (ev.created_by_name || 'mon partenaire');
+    const addedBy = ev.created_by === currentUser.email ? 'Moi' : (ev.created_by_name || 'Laetitia');
     
     row.innerHTML=`<div class="mer-info">
       <div class="mer-title">${TYPE_ICONS[ev.type] || '📅'} ${ev.title}</div>
-      <div class="mer-sub">Prévu pour le : <strong>${eventDateDisplay}</strong></div>
+      <div class="mer-sub">Prévu pour le : <strong>${eventDateDisplay}</strong> ${ev.time_str ? 'à ' + ev.time_str : ''}</div>
       <div class="mer-sub" style="font-size: 10px; color: var(--primary); margin-top: 4px;">Ajouté par ${addedBy}</div>
     </div>`;
+
+    // Actions
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex; flex-direction:column; gap:6px; margin-left:10px;';
+    const btnEdit = document.createElement('button'); btnEdit.className = 'btn-edit-event'; btnEdit.innerHTML = '✏️';
+    btnEdit.onclick = () => openEditModal(ev.id);
+    const btnDel = document.createElement('button'); btnDel.className = 'btn-delete-event'; btnDel.innerHTML = '✕';
+    btnDel.onclick = () => deleteEvent(ev.id);
+    actions.appendChild(btnEdit); actions.appendChild(btnDel);
+    row.appendChild(actions);
     
     const createdDate = new Date(ev.created_at);
     const now = new Date();
