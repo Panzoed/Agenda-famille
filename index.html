@@ -2,515 +2,232 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Agenda Famille</title>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#F59E0B">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Agenda Famille">
-<link rel="apple-touch-icon" href="/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#FFF8F0; --primary:#F59E0B; --primary2:#D97706; --accent:#EC4899;
-  --text:#1F2937; --muted:#9CA3AF; --border:#F3F4F6;
-}
+:root { --bg:#FFF8F0; --primary:#F59E0B; --primary2:#D97706; --accent:#EC4899; --text:#1F2937; --muted:#9CA3AF; --border:#F3F4F6; }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent;}
 .auth-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;flex-direction:column;gap:16px;background:linear-gradient(135deg,#FFF8F0,#FEF3C7,#FCE7F3);}
-.auth-card{background:white;border-radius:24px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(245,158,11,0.15);}
-.family-logo{text-align:center;margin-bottom:24px;}
-.family-emoji{font-size:48px;display:block;margin-bottom:8px;}
-.family-title{font-size:26px;font-weight:900;color:var(--text);}
+.auth-card{background:white;border-radius:24px;padding:30px 20px;width:100%;max-width:380px;box-shadow:0 10px 30px rgba(0,0,0,0.1);}
+.family-logo{text-align:center;margin-bottom:20px;}
+.family-emoji{font-size:40px;display:block;}
+.family-title{font-size:24px;font-weight:900;}
 .family-title span{color:var(--primary);}
-.family-sub{font-size:12px;color:var(--muted);margin-top:4px;}
-.family-divider{width:40px;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent));margin:16px auto;border-radius:2px;}
-.form-group{margin-bottom:14px;}
-.form-group label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
-.form-group input{width:100%;background:#F9FAFB;border:2px solid #F3F4F6;border-radius:12px;padding:12px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none;transition:border 0.2s;}
-.form-group input:focus{border-color:var(--primary);}
-.btn-login{width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--primary2));border:none;border-radius:12px;color:white;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;margin-top:4px;}
-.btn-secondary{width:100%;padding:12px;background:#F9FAFB;border:2px solid #F3F4F6;border-radius:12px;color:var(--muted);font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;}
-.alert{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;display:none;font-weight:600;}
-.alert-error{background:#FEF2F2;border:2px solid #FCA5A5;color:#DC2626;}
-.alert-success{background:#F0FDF4;border:2px solid #86EFAC;color:#16A34A;}
-.signature{font-size:11px;color:#D1D5DB;text-align:center;}
-.signature span{color:#93C5FD;}
-.toggle-auth{text-align:center;margin-top:12px;font-size:12px;color:var(--muted);}
-.toggle-auth a{color:var(--primary);font-weight:700;cursor:pointer;}
-.app-wrap{display:none;padding:0 0 80px;}
-.topbar{background:white;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(0,0,0,0.06);position:sticky;top:0;z-index:50;}
-.topbar-left{display:flex;align-items:center;gap:10px;}
-.topbar-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:white;}
-.topbar-name{font-size:14px;font-weight:800;}
-.topbar-sub{font-size:11px;color:var(--muted);}
-.topbar-right{display:flex;gap:8px;align-items:center;}
-.btn-deconnect{background:#FEF2F2;border:none;color:#EF4444;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
-.btn-admin{background:#EFF6FF;border:none;color:#3B82F6;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
-.view-tabs{display:flex;gap:8px;padding:14px 16px 0;}
-.vtab{flex:1;padding:10px;border-radius:12px;border:2px solid var(--border);background:white;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);text-align:center;}
-.vtab.active{background:var(--primary);border-color:var(--primary);color:white;}
-.month-nav{display:flex;align-items:center;padding:14px 16px 8px;gap:10px;}
-.mnav-btn{background:white;border:2px solid var(--border);border-radius:10px;padding:6px 14px;font-size:18px;cursor:pointer;}
-.month-label{flex:1;text-align:center;font-size:18px;font-weight:900;}
-.legend{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 10px;}
-.leg{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:700;}
-.leg-dot{width:8px;height:8px;border-radius:50%;}
-.month-view{padding:0 16px 8px;}
-.cal-headers{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
-.cal-hdr{text-align:center;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;padding:6px 0;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;}
-.cal-day{background:white;border-radius:10px;height:76px;padding:4px 3px;cursor:pointer;border:2px solid transparent;position:relative;overflow:hidden;min-width:0;}
-.cal-day.empty{background:transparent;cursor:default;}
-.cal-day.today{outline:3px solid #0891B2;box-shadow:inset 0 0 0 1px #0891B2;}
-.cal-day.today::after{content:'';position:absolute;bottom:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#0891B2;}
-.day-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
+.form-group{margin-bottom:12px;}
+.form-group label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;text-transform:uppercase;}
+.form-group input, .form-group select, .form-group textarea{width:100%;background:#F9FAFB;border:2px solid #F3F4F6;border-radius:12px;padding:12px;font-family:inherit;font-size:14px;outline:none;}
+.btn-login{width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--primary2));border:none;border-radius:12px;color:white;font-weight:800;cursor:pointer;margin-top:10px;}
+.app-wrap{display:none;padding-bottom:100px;}
+.topbar{background:white;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px rgba(0,0,0,0.05);position:sticky;top:0;z-index:100;}
+.topbar-name{font-weight:800;font-size:14px;}
+.btn-deconnect{background:#FEF2F2;color:#EF4444;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;}
+.view-tabs{display:flex;gap:8px;padding:15px 16px;}
+.vtab{flex:1;padding:10px;border-radius:12px;border:2px solid var(--border);background:white;font-weight:700;color:var(--muted);font-size:13px;}
+.vtab.active{background:var(--primary);color:white;border-color:var(--primary);}
+.month-nav{display:flex;align-items:center;justify-content:space-between;padding:0 16px 10px;}
+.month-label{font-size:18px;font-weight:900;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 16px;}
+.cal-day{background:white;border-radius:10px;height:70px;padding:5px;position:relative;border:2px solid transparent;}
+.cal-day.today{border-color:var(--primary);}
 .day-num{font-size:11px;font-weight:800;}
-.day-work{font-size:7px;font-weight:800;padding:1px 3px;border-radius:3px;}
-.dw-matin{background:#DBEAFE;color:#1D4ED8;}
-.dw-aprem{background:#FEF3C7;color:#B45309;}
-.dw-ferie{background:#FEE2E2;color:#B91C1C;}
-.dw-fermeture{background:#D1FAE5;color:#065F46;}
-.dw-we{background:#F3F4F6;color:#9CA3AF;}
-.event-item{font-size:7px;font-weight:700;color:#BE185D;background:#FCE7F3;border-radius:3px;padding:1px 3px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.month-events-section{padding:0 16px 16px;}
-.month-events-title{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
-.month-event-row{background:white;border-radius:12px;padding:10px 14px;margin-bottom:8px;border-left:4px solid var(--primary);display:flex;align-items:flex-start;gap:10px;}
-.mer-date{font-size:11px;font-weight:800;color:var(--primary2);min-width:50px;}
-.mer-info{flex:1;}
-.mer-title{font-size:13px;font-weight:800;}
-.mer-sub{font-size:11px;color:var(--muted);margin-top:2px;}
-.mer-work{display:inline-block;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-top:4px;}
-.ferie-row{background:white;border-radius:12px;padding:10px 14px;margin-bottom:8px;border-left:4px solid #DC2626;display:flex;align-items:center;gap:10px;}
-.ferie-date{font-size:11px;font-weight:800;color:#B91C1C;min-width:50px;}
-.ferie-name{font-size:13px;font-weight:800;color:#B91C1C;}
-.week-view{padding:0 16px 16px;}
-.week-day{background:white;border-radius:14px;padding:12px 14px;margin-bottom:8px;}
-.week-day-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.week-day-name{font-size:13px;font-weight:800;}
-.week-day-date{font-size:11px;color:var(--muted);font-weight:600;}
-.week-day-badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;}
-.wdb-matin{background:#DBEAFE;color:#1D4ED8;}
-.wdb-aprem{background:#FEF3C7;color:#B45309;}
-.wdb-ferie{background:#FEE2E2;color:#B91C1C;}
-.wdb-fermeture{background:#D1FAE5;color:#065F46;}
-.wdb-we{background:#F3F4F6;color:#9CA3AF;}
-.week-day.today-week{border:2px solid #0891B2;}
-.week-event{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#FFFBEB;border-radius:10px;margin-bottom:6px;border-left:3px solid var(--primary);}
-.week-event-time{font-size:10px;font-weight:800;color:var(--primary2);min-width:35px;}
-.btn-delete-event{background:#FEF2F2;border:none;color:#EF4444;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;}
-.btn-edit-event{background:#EFF6FF;border:none;color:#3B82F6;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;}
-.no-events{font-size:12px;color:#D1D5DB;font-weight:600;text-align:center;padding:8px 0;}
-.fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;background:linear-gradient(135deg,var(--primary),var(--accent));border:none;border-radius:50%;color:white;font-size:28px;cursor:pointer;box-shadow:0 8px 24px rgba(245,158,11,0.4);z-index:100;display:flex;align-items:center;justify-content:center;}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end;justify-content:center;}
+.event-dot{height:4px;width:4px;border-radius:50%;background:var(--accent);margin-top:2px;}
+.fab{position:fixed;bottom:25px;right:20px;width:56px;height:56px;background:var(--primary);border-radius:50%;border:none;color:white;font-size:30px;box-shadow:0 5px 15px rgba(245,158,11,0.4);z-index:200;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;padding:20px;}
 .modal-overlay.show{display:flex;}
-.modal{background:white;border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;}
-.modal-title{font-size:18px;font-weight:900;margin-bottom:20px;}
-.modal-group{margin-bottom:14px;}
-.modal-group label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase;}
-.modal-group input,.modal-group textarea,.modal-group select{width:100%;background:#F9FAFB;border:2px solid #F3F4F6;border-radius:12px;padding:11px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none;}
-.modal-group textarea{resize:none;height:70px;}
-.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.btn-save{width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--accent));border:none;border-radius:12px;color:white;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;margin-top:8px;}
-.btn-cancel-modal{width:100%;padding:12px;background:#F9FAFB;border:2px solid #F3F4F6;border-radius:12px;color:var(--muted);font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;}
-.day-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end;justify-content:center;}
-.day-modal-overlay.show{display:flex;}
-.day-modal{background:white;border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto;}
-.day-modal-title{font-size:18px;font-weight:900;margin-bottom:4px;}
-.day-modal-badge{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:8px;margin-bottom:14px;}
-.day-event-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#FFFBEB;border-radius:12px;margin-bottom:8px;border-left:4px solid var(--primary);}
-.day-event-info{flex:1;}
-.day-event-title{font-size:14px;font-weight:800;}
-.day-event-time{font-size:11px;color:var(--muted);margin-top:2px;}
-.day-event-by{font-size:10px;color:var(--primary2);font-weight:700;margin-top:2px;}
-.day-event-actions{display:flex;flex-direction:column;gap:4px;}
-.btn-add-day{width:100%;padding:12px;background:linear-gradient(135deg,var(--primary),var(--accent));border:none;border-radius:12px;color:white;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:10px;}
-.activity-section{padding:0 16px 16px;}
-.btn-close-day{width:100%;padding:11px;background:#F9FAFB;border:2px solid #F3F4F6;border-radius:12px;color:var(--muted);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;}
-.admin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:flex-start;justify-content:center;padding:20px;}
-.admin-overlay.show{display:flex;}
-.admin-panel{background:white;border-radius:24px;padding:24px 20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;margin-top:20px;}
-.admin-title{font-size:20px;font-weight:900;margin-bottom:16px;}
-.admin-card{background:#F9FAFB;border-radius:12px;padding:14px;margin-bottom:10px;border-left:4px solid var(--primary);}
-.admin-card-name{font-size:14px;font-weight:800;}
-.admin-card-email{font-size:12px;color:var(--muted);margin-top:2px;}
-.admin-card-actions{display:flex;gap:8px;margin-top:10px;}
-.btn-approve{flex:1;padding:8px;background:#F0FDF4;border:none;color:#16A34A;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;}
-.btn-reject{flex:1;padding:8px;background:#FEF2F2;border:none;color:#EF4444;border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;}
-.admin-empty{text-align:center;color:var(--muted);font-size:13px;padding:24px;font-weight:600;}
-.badge-pending{display:inline-block;background:#FEF3C7;color:#B45309;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;margin-left:4px;}
-.btn-invite-partner{background:#FCE7F3;border:none;color:#BE185D;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
-.journal-card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.1s; border-radius: 16px; }
-.journal-card:active { transform: scale(0.98); }
+.modal{background:white;border-radius:20px;padding:20px;width:100%;max-width:400px;position:relative;}
+.modal-title{font-weight:900;font-size:18px;margin-bottom:15px;}
+.btn-save{width:100%;padding:14px;background:var(--primary);border:none;border-radius:12px;color:white;font-weight:800;margin-top:10px;}
+.btn-cancel{width:100%;padding:10px;background:none;border:none;color:var(--muted);font-weight:700;margin-top:5px;}
+.alert{padding:12px;border-radius:10px;margin-bottom:10px;font-size:13px;display:none;font-weight:700;}
+.alert-error{background:#FEF2F2;color:#DC2626;}
+.journal-item{background:white;padding:15px;border-radius:15px;margin-bottom:10px;border-left:4px solid var(--primary);}
 </style>
 </head>
 <body>
 
 <div class="auth-wrap" id="authWrap">
   <div class="auth-card">
-    <div class="family-logo">
-      <span class="family-emoji">👨‍👩‍👧</span>
-      <div class="family-title">Agenda <span>Famille</span></div>
-      <div class="family-sub" id="authSub">Organisez votre vie ensemble</div>
-      <div class="family-divider"></div>
-    </div>
-    <div class="alert alert-error" id="alertError"></div>
-    <div class="alert alert-success" id="alertSuccess"></div>
-
-    <div id="loginForm">
-      <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="votre@email.com"></div>
-      <div class="form-group"><label>Mot de passe</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
-      <button class="btn-login" onclick="doLogin()">Se connecter 🚀</button>
-      <div class="toggle-auth">Pas encore de compte ? <a onclick="showRegister()">S'inscrire</a></div>
-    </div>
-
-    <div id="registerForm" style="display:none">
-      <div class="form-group"><label>Votre prénom</label><input type="text" id="regName" placeholder="Ex: Marie"></div>
-      <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="votre@email.com"></div>
-      <div class="form-group"><label>Mot de passe</label><input type="password" id="regPassword" placeholder="••••••••"></div>
-      <div class="form-group"><label>Nom de votre famille</label><input type="text" id="regFamily" placeholder="Ex: Famille Dupont"></div>
-      <div class="form-group"><label>Email du partenaire (Optionnel)</label><input type="email" id="regPartnerEmail" placeholder="partenaire@email.com"></div>
-      <button class="btn-login" onclick="doRegister()">Envoyer la demande 📨</button>
-      <div class="toggle-auth">Déjà un compte ? <a onclick="showLogin()">Se connecter</a></div>
-    </div>
-
-    <div id="setPassForm" style="display:none">
-      <div class="form-group"><label>Votre prénom</label><input type="text" id="setPassName" placeholder="Ex: Laetitia"></div>
-      <div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="setPassPassword" placeholder="••••••••"></div>
-      <button class="btn-login" onclick="doSetPassword()">Activer mon compte 🚀</button>
-    </div>
+    <div class="family-logo"><span class="family-emoji">👨‍👩‍👧</span><div class="family-title">Agenda <span>Famille</span></div></div>
+    <div class="alert alert-error" id="authError"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="votre@email.com"></div>
+    <div class="form-group"><label>Mot de passe</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+    <button class="btn-login" onclick="doLogin()">Connexion 🚀</button>
   </div>
 </div>
 
 <div class="app-wrap" id="appWrap">
   <div class="topbar">
-    <div class="topbar-left">
-      <div class="topbar-avatar" id="topAvatar">E</div>
-      <div>
-        <div class="topbar-name" id="topName">Emmanuel</div>
-        <div class="topbar-sub">👨‍👩‍👧 Agenda Famille</div>
-      </div>
-    </div>
-    <div class="topbar-right">
-      <button class="btn-invite-partner" onclick="openInviteModal()">➕ Inviter</button>
-      <button class="btn-admin" id="btnAdmin" onclick="openAdmin()" style="display:none">🔧 Admin <span class="badge-pending" id="pendingBadge" style="display:none">0</span></button>
-      <button class="btn-deconnect" onclick="doLogout()">Déconnexion</button>
-    </div>
+    <div class="topbar-name" id="topName">Chargement...</div>
+    <button class="btn-deconnect" onclick="doLogout()">Déconnexion</button>
   </div>
   <div class="view-tabs">
-    <button class="vtab active" id="tabMonth" onclick="setView('month')">📅 Mois</button>
-    <button class="vtab" id="tabWeek" onclick="setView('week')">📆 Semaine</button>
-    <button class="vtab" id="tabJournal" onclick="setView('journal')">📋 Journal</button>
+    <button class="vtab active" id="tabMonth" onclick="setView('month')">Mois</button>
+    <button class="vtab" id="tabJournal" onclick="setView('journal')">Journal</button>
   </div>
-  <div class="month-nav">
-    <button class="mnav-btn" onclick="changeMonth(-1)">‹</button>
-    <div class="month-label" id="monthLabel"></div>
-    <button class="mnav-btn" onclick="changeMonth(1)">›</button>
-  </div>
-  <div class="legend">
-    <div class="leg"><div class="leg-dot" style="background:#3B82F6"></div>Matin</div>
-    <div class="leg"><div class="leg-dot" style="background:#F59E0B"></div>Après-midi</div>
-    <div class="leg"><div class="leg-dot" style="background:#DC2626"></div>Férié</div>
-    <div class="leg"><div class="leg-dot" style="background:#16A34A"></div>Fermeture</div>
-    <div class="leg"><div class="leg-dot" style="background:#EC4899"></div>Événement</div>
-  </div>
-  <div class="month-view" id="monthView">
-    <div class="cal-headers">
-      <div class="cal-hdr">Lu</div><div class="cal-hdr">Ma</div><div class="cal-hdr">Me</div>
-      <div class="cal-hdr">Je</div><div class="cal-hdr">Ve</div>
-      <div class="cal-hdr" style="color:#F59E0B">Sa</div>
-      <div class="cal-hdr" style="color:#F59E0B">Di</div>
+  <div id="mainView">
+    <div class="month-nav">
+      <button onclick="changeMonth(-1)">‹</button>
+      <div class="month-label" id="monthLabel">Mai 2026</div>
+      <button onclick="changeMonth(1)">›</button>
     </div>
     <div class="cal-grid" id="calGrid"></div>
   </div>
-  <div class="month-events-section" id="monthEventsSection"></div>
-  <div class="week-view" id="weekView" style="display:none"><div id="weekDays"></div></div>
-  <div class="journal-view" id="journalView" style="display:none;padding:0 16px 16px;"></div>
-  <button class="fab" onclick="openAddModal()">+</button>
+  <div id="journalView" style="display:none; padding:16px;"></div>
+  <button class="fab" onclick="openModal()">+</button>
 </div>
 
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-  <div class="modal">
-    <div class="modal-title" id="modalTitle">✏️ Nouvel événement</div>
-    <div class="modal-group"><label>Titre *</label><input type="text" id="evTitle" placeholder="Ex: Courses, Médecin..."></div>
-    <div class="modal-group"><label>Description</label><textarea id="evDesc" placeholder="Détails optionnels..."></textarea></div>
-    <div class="modal-row">
-      <div class="modal-group"><label>Date *</label><input type="date" id="evDate"></div>
-      <div class="modal-group"><label>Heure</label><input type="time" id="evTime"></div>
-    </div>
-    <div class="modal-group">
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">✏️ Événement</div>
+    <div class="form-group"><label>Titre</label><input type="text" id="evTitle" placeholder="Faire les courses..."></div>
+    <div class="form-group"><label>Date</label><input type="date" id="evDate"></div>
+    <div class="form-group">
       <label>Répétition</label>
       <select id="evRepeat">
         <option value="1">Une seule fois</option>
-        <optgroup label="Hebdomadaire (Semaines)">
-          <option value="w2">Pendant 2 semaines</option>
-          <option value="w3">Pendant 3 semaines</option>
-          <option value="w4">Pendant 4 semaines</option>
+        <optgroup label="Hebdomadaire">
+          <option value="w2">2 semaines</option>
+          <option value="w3">3 semaines</option>
+          <option value="w4">4 semaines</option>
         </optgroup>
-        <optgroup label="Mensuel (Mois)">
-          <option value="2">Pendant 2 mois</option>
-          <option value="3">Pendant 3 mois</option>
-          <option value="4">Pendant 4 mois</option>
-          <option value="5">Pendant 5 mois</option>
-          <option value="6">Pendant 6 mois</option>
-          <option value="7">Pendant 7 mois</option>
-          <option value="8">Pendant 8 mois</option>
-          <option value="9">Pendant 9 mois</option>
-          <option value="10">Pendant 10 mois</option>
-          <option value="11">Pendant 11 mois</option>
-          <option value="12">Pendant 12 mois (1 an)</option>
+        <optgroup label="Mensuel">
+          <option value="2">2 mois</option>
+          <option value="3">3 mois</option>
+          <option value="6">6 mois</option>
+          <option value="12">12 mois</option>
         </optgroup>
-      </select>
-    </div>
-    <div class="modal-group">
-      <label>Type</label>
-      <select id="evType">
-        <option value="task">✅ Tâche</option>
-        <option value="rdv">📍 Rendez-vous</option>
-        <option value="family">👨‍👩‍👧 Famille</option>
-        <option value="fun">🎉 Sortie/Loisir</option>
-        <option value="important">⚠️ Important</option>
       </select>
     </div>
     <button class="btn-save" onclick="saveEvent()">Enregistrer 💾</button>
-    <button class="btn-cancel-modal" onclick="closeModal()">Annuler</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="inviteModalOverlay" onclick="closeInviteModal(event)">
-  <div class="modal">
-    <div class="modal-title">👨‍👩‍👧 Inviter mon partenaire</div>
-    <div class="modal-group"><label>Son prénom</label><input type="text" id="inviteName" placeholder="Ex: Laetitia"></div>
-    <div class="modal-group"><label>Son Email</label><input type="email" id="inviteEmail" placeholder="partenaire@email.com"></div>
-    <button class="btn-save" onclick="doInvite()">Envoyer l'invitation 🚀</button>
-    <button class="btn-cancel-modal" onclick="closeInviteModal()">Annuler</button>
-  </div>
-</div>
-
-<div class="day-modal-overlay" id="dayModalOverlay" onclick="closeDayModal(event)">
-  <div class="day-modal">
-    <div class="day-modal-title" id="dayModalTitle"></div>
-    <div class="day-modal-badge" id="dayModalBadge"></div>
-    <div id="dayEventsList"></div>
-    <button class="btn-add-day" onclick="addEventForDay()">+ Ajouter un événement</button>
-    <button class="btn-close-day" onclick="closeDayModal()">Fermer</button>
+    <button class="btn-cancel" onclick="closeModal()">Annuler</button>
   </div>
 </div>
 
 <script>
-const EMAIL_ADMIN='siciliano_messinese@hotmail.it';
-let currentUser=null,events=[],curYear=new Date().getFullYear(),curMonth=new Date().getMonth(),curView='month',curWeekStart=null,selectedDay=null,editingEventId=null;
-const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-const DAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
-const TYPE_ICONS={task:'✅',rdv:'📍',family:'👨‍👩‍👧',fun:'🎉',important:'⚠️'};
-const FERIE_NAMES={'2026-01-01':'Nouvel An','2026-04-06':'Lundi de Pâques','2026-05-01':'Fête du Travail','2026-05-14':'Ascension','2026-05-25':'Lundi de Pentecôte','2026-07-21':'Fête Nationale','2026-07-28':'Récup. 15/08','2026-08-15':'Assomption','2026-11-01':'Toussaint','2026-11-11':'Armistice','2026-12-25':'Noël','2026-12-31':'Récup. 1/11'};
-const FERIES=new Set(Object.keys(FERIE_NAMES));
-const FERMETURES=new Set();
-for(let d=24;d<=31;d++){if(d===28)continue;const dow=new Date(2026,6,d).getDay();if(dow===0||dow===6)continue;FERMETURES.add('2026-07-'+String(d).padStart(2,'0'));}
-FERMETURES.add('2026-11-02');
-
-function formatSmartDate(dateStr) {
-    const d = new Date(dateStr + 'T12:00:00');
-    const today = new Date();
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
-    if (d.toDateString() === today.toDateString()) return "Aujourd'hui";
-    if (d.toDateString() === tomorrow.toDateString()) return "Demain";
-    return d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
-}
+let currentUser = null;
+let events = [];
+let curDate = new Date();
+const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
 window.onload = () => {
-    const saved=sessionStorage.getItem('agendaUser');
-    if(saved){currentUser=JSON.parse(saved);showApp();}
+  const saved = sessionStorage.getItem('agendaUser');
+  if(saved) { currentUser = JSON.parse(saved); showApp(); }
 };
 
-function setView(view){
-  curView=view;
-  document.getElementById('tabMonth').className='vtab'+(view==='month'?' active':'');
-  document.getElementById('tabWeek').className='vtab'+(view==='week'?' active':'');
-  document.getElementById('tabJournal').className='vtab'+(view==='journal'?' active':'');
-  document.querySelector('.month-nav').style.display = (view === 'journal') ? 'none' : 'flex';
-  document.querySelector('.legend').style.display = (view === 'journal') ? 'none' : 'flex';
-  document.getElementById('monthView').style.display=view==='month'?'block':'none';
-  document.getElementById('monthEventsSection').style.display=view==='month'?'block':'none';
-  document.getElementById('weekView').style.display=view==='week'?'block':'none';
-  document.getElementById('journalView').style.display=view==='journal'?'block':'none';
-  renderAll();
-}
-
-function renderActivity(){
-  const container=document.getElementById('journalView');if(!container)return;
-  container.innerHTML='<div class="month-events-title">🔔 Derniers ajouts dans l\'agenda</div>';
-  const sorted = [...events].sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
-  if(!sorted.length){ container.innerHTML += '<div class="no-events">Aucune activité</div>'; return; }
-  sorted.slice(0,15).forEach(ev=>{
-    const row=document.createElement('div');row.className='month-event-row journal-card';
-    const addedBy = ev.created_by === currentUser.email ? 'Moi' : (ev.created_by_name || 'Laetitia');
-    row.innerHTML=`<div class="mer-info">
-      <div class="mer-title">${TYPE_ICONS[ev.type] || '📅'} ${ev.title}</div>
-      <div class="mer-sub">Pour le : <strong>${formatSmartDate(ev.date_str)}</strong> ${ev.time_str ? 'à ' + ev.time_str : ''}</div>
-      <div class="mer-sub" style="font-size:10px; color:var(--primary); margin-top:4px;">Ajouté par ${addedBy}</div>
-    </div>`;
-    const acts = document.createElement('div'); acts.style.cssText='display:flex;flex-direction:column;gap:6px;';
-    const bE=document.createElement('button');bE.className='btn-edit-event';bE.innerHTML='✏️';bE.onclick=()=>openEditModal(ev.id);
-    const bD=document.createElement('button');bD.className='btn-delete-event';bD.innerHTML='✕';bD.onclick=()=>deleteEvent(ev.id);
-    acts.appendChild(bE);acts.appendChild(bD);row.appendChild(acts);container.appendChild(row);
-  });
-}
-
-async function saveEvent(){
-  const title=document.getElementById('evTitle').value.trim();
-  const date_str=document.getElementById('evDate').value;
-  const repeat_val=document.getElementById('evRepeat').value; // Peut être "w2" ou "3"
-  if(!title||!date_str)return alert('Titre et date obligatoires !');
-  
-  const body={
-      action: editingEventId ? 'update' : 'add',
-      id: editingEventId,
-      title,
-      description: document.getElementById('evDesc').value.trim(),
-      date_str,
-      repeat_count: repeat_val, // Le serveur devra traiter le prefixe 'w'
-      time_str: document.getElementById('evTime').value||null,
-      type: document.getElementById('evType').value,
-      created_by: currentUser.email,
-      created_by_name: currentUser.name,
-      family_id: currentUser.family_id
-  };
-  try {
-      await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-      closeModal();loadEvents();
-  } catch(e) { alert('Erreur'); }
-}
-
-// ... Reste des fonctions inchangé par rapport à la version précédente ...
-// (doLogin, loadEvents, renderMonth, renderWeek, openDayModal, etc.)
-
-function isoWeek(date){const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));const day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);const y=new Date(Date.UTC(d.getUTCFullYear(),0,1));return Math.ceil((((d-y)/86400000)+1)/7);}
-function getWorkType(ds){const date=new Date(ds+'T12:00:00');const dow=date.getDay();if(FERMETURES.has(ds))return'fermeture';if(FERIES.has(ds))return'ferie';if(dow===0||dow===6)return'we';return isoWeek(date)%2===0?'matin':'aprem';}
-function getWorkBadge(t){const m={matin:{cls:'dw-matin',lbl:'Matin'},aprem:{cls:'dw-aprem',lbl:'Aprèm'},ferie:{cls:'dw-ferie',lbl:'Férié'},fermeture:{cls:'dw-fermeture',lbl:'Fermé'},we:{cls:'dw-we',lbl:''}};return m[t]||m.we;}
-function getWeekBadge(t){const m={matin:{cls:'wdb-matin',lbl:'🌅 Matin'},aprem:{cls:'wdb-aprem',lbl:'🌆 Après-midi'},ferie:{cls:'wdb-ferie',lbl:'🔴 Férié'},fermeture:{cls:'wdb-fermeture',lbl:'🏭 Fermé'},we:{cls:'wdb-we',lbl:'Weekend'}};return m[t]||m.we;}
-function getMonday(d){const date=new Date(d);const day=date.getDay()||7;date.setDate(date.getDate()-day+1);date.setHours(0,0,0,0);return date;}
-function toDS(date){return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');}
-function showError(msg){const el=document.getElementById('alertError');el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',4000);}
-function showSuccess(msg){const el=document.getElementById('alertSuccess');el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',5000);}
-function showRegister(){document.getElementById('loginForm').style.display='none';document.getElementById('registerForm').style.display='block';}
-function showLogin(){document.getElementById('loginForm').style.display='block';document.getElementById('registerForm').style.display='none';}
-
-async function doLogin(){
-  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
-  const password=document.getElementById('loginPassword').value;
-  if(!email||!password)return showError('Remplissez tous les champs');
-  try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'login',email,password})});
-  const data=await res.json();if(!res.ok)return showError(data.error||'Erreur');
-  currentUser=data;sessionStorage.setItem('agendaUser',JSON.stringify(data));showApp();}
-  catch(e){showError('Erreur réseau');}
-}
-
-async function doRegister(){
-  const name=document.getElementById('regName').value.trim();
-  const email=document.getElementById('regEmail').value.trim().toLowerCase();
-  const password=document.getElementById('regPassword').value;
-  const family_name=document.getElementById('regFamily').value.trim();
-  if(!name||!email||!password||!family_name)return showError('Tous les champs sont obligatoires');
-  try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'register',name,email,password,family_name})});
-  const data=await res.json();if(!res.ok)return showError(data.error||'Erreur');
-  showSuccess('✅ Demande envoyée !');setTimeout(()=>showLogin(),3000);}
-  catch(e){showError('Erreur réseau');}
-}
-
-function doLogout(){currentUser=null;sessionStorage.removeItem('agendaUser');document.getElementById('appWrap').style.display='none';document.getElementById('authWrap').style.display='flex';showLogin();}
-
-function showApp(){
-  curWeekStart=getMonday(new Date());
-  document.getElementById('authWrap').style.display='none';
-  document.getElementById('appWrap').style.display='block';
-  document.getElementById('topName').textContent=currentUser.name;
-  document.getElementById('topAvatar').textContent=currentUser.name.charAt(0).toUpperCase();
-  if(currentUser.email===EMAIL_ADMIN){document.getElementById('btnAdmin').style.display='block';}
+function showApp() {
+  document.getElementById('authWrap').style.display = 'none';
+  document.getElementById('appWrap').style.display = 'block';
+  document.getElementById('topName').textContent = currentUser.name;
   loadEvents();
 }
 
-async function loadEvents(){
-  try{const res=await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list',family_id:currentUser.family_id})});
-  events=await res.json();}catch(e){events=[];}
-  renderAll();
-}
-
-function getEventsForDay(ds){return events.filter(e=>e.date_str===ds);}
-
-function changeMonth(dir){
-  if(curView==='month'){curMonth+=dir;if(curMonth<0){curMonth=11;curYear--;}if(curMonth>11){curMonth=0;curYear++;}}
-  else{curWeekStart=new Date(curWeekStart);curWeekStart.setDate(curWeekStart.getDate()+dir*7);}
-  renderAll();
-}
-
-function renderAll(){
-  if(curView==='month'){document.getElementById('monthLabel').textContent=MONTHS[curMonth]+' '+curYear;renderMonth();renderMonthEvents();renderActivity();}
-  else if(curView==='week'){const end=new Date(curWeekStart);end.setDate(end.getDate()+6);document.getElementById('monthLabel').textContent=curWeekStart.getDate()+' → '+end.getDate()+' '+MONTHS[end.getMonth()];renderWeek();renderActivity();}
-  else {document.getElementById('monthLabel').textContent='Journal';renderActivity();}
-}
-
-function renderMonth(){
-  const grid=document.getElementById('calGrid');grid.innerHTML='';
-  const firstDay=new Date(curYear,curMonth,1).getDay()||7;
-  const dim=new Date(curYear,curMonth+1,0).getDate();
-  for(let i=firstDay-1;i>0;i--){grid.appendChild(document.createElement('div')).className='cal-day empty';}
-  for(let d=1;d<=dim;d++){
-    const ds=curYear+'-'+String(curMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const wtype=getWorkType(ds); const wb=getWorkBadge(wtype);
-    const cell=document.createElement('div');cell.className='cal-day';
-    cell.style.borderColor= (ds===toDS(new Date())) ? '#0891B2' : (wtype==='matin'?'#BFDBFE':wtype==='aprem'?'#FDE68A':wtype==='ferie'?'#FECACA':'#F3F4F6');
-    cell.onclick=()=>openDayModal(ds,d);
-    cell.innerHTML=`<div class="day-top"><div class="day-num">${d}</div>${wb.lbl?`<div class="day-work ${wb.cls}">${wb.lbl}</div>`:''}</div>`;
-    getEventsForDay(ds).slice(0,2).forEach(ev=>{
-      const p=document.createElement('div');p.className='event-item';p.textContent=(TYPE_ICONS[ev.type]||'📅')+' '+ev.title;cell.appendChild(p);
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.toLowerCase().trim();
+  const password = document.getElementById('loginPassword').value;
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'login', email, password })
     });
-    grid.appendChild(cell);
-  }
+    const data = await res.json();
+    if(res.ok) { currentUser = data; sessionStorage.setItem('agendaUser', JSON.stringify(data)); showApp(); }
+    else { alert(data.error); }
+  } catch(e) { alert("Erreur de connexion"); }
 }
 
-function renderWeek(){
-  const container=document.getElementById('weekDays');container.innerHTML='';
-  for(let i=0;i<7;i++){
-    const date=new Date(curWeekStart);date.setDate(date.getDate()+i);
-    const ds=toDS(date);const evs=getEventsForDay(ds);const wtype=getWorkType(ds);const wb=getWeekBadge(wtype);
-    const dayEl=document.createElement('div');dayEl.className='week-day';
-    dayEl.innerHTML=`<div class="week-day-header"><div class="week-day-name">${DAYS[i]} ${date.getDate()}</div><span class="week-day-badge ${wb.cls}">${wb.lbl}</span></div>`;
-    if(!evs.length) dayEl.innerHTML+='<div class="no-events">Rien de prévu</div>';
-    evs.forEach(ev=>{
-      dayEl.innerHTML+=`<div class="week-event"><span class="week-event-time">${ev.time_str||'--:--'}</span><div style="flex:1"><b>${TYPE_ICONS[ev.type]}${ev.title}</b></div></div>`;
+function doLogout() { sessionStorage.clear(); location.reload(); }
+
+async function loadEvents() {
+  try {
+    const res = await fetch('/api/events', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'list', family_id: currentUser.family_id })
     });
-    container.appendChild(dayEl);
-  }
+    events = await res.json();
+    render();
+  } catch(e) { console.log(e); }
 }
 
-function openDayModal(ds,d){
-  selectedDay=ds;
-  const evs=getEventsForDay(ds);
-  document.getElementById('dayModalTitle').textContent=ds;
-  const list=document.getElementById('dayEventsList');list.innerHTML='';
-  evs.forEach(ev=>{
-    const addedBy = ev.created_by === currentUser.email ? 'vous' : (ev.created_by_name || 'Laetitia');
-    list.innerHTML+=`<div class="day-event-item"><div>${TYPE_ICONS[ev.type]}</div><div class="day-event-info"><b>${ev.title}</b><br><small>Ajouté par ${addedBy}</small></div></div>`;
+async function saveEvent() {
+  const title = document.getElementById('evTitle').value;
+  const date_str = document.getElementById('evDate').value;
+  const repeat_count = document.getElementById('evRepeat').value;
+  if(!title || !date_str) return alert("Titre et Date requis");
+
+  const btn = document.querySelector('.btn-save');
+  btn.disabled = true; btn.textContent = "Envoi...";
+
+  try {
+    await fetch('/api/events', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        action: 'add', 
+        family_id: currentUser.family_id,
+        title, date_str, repeat_count,
+        created_by_name: currentUser.name 
+      })
+    });
+    closeModal();
+    loadEvents();
+  } catch(e) { alert("Erreur sauvegarde"); }
+  btn.disabled = false; btn.textContent = "Enregistrer 💾";
+}
+
+function render() {
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  const year = curDate.getFullYear();
+  const month = curDate.getMonth();
+  document.getElementById('monthLabel').textContent = MONTHS[month] + ' ' + year;
+
+  const firstDay = new Date(year, month, 1).getDay() || 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  for(let i=1; i<firstDay; i++) grid.appendChild(document.createElement('div'));
+
+  for(let d=1; d<=daysInMonth; d++) {
+    const ds = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const dayEl = document.createElement('div');
+    dayEl.className = 'cal-day';
+    if(ds === new Date().toISOString().split('T')[0]) dayEl.classList.add('today');
+    dayEl.innerHTML = `<div class="day-num">${d}</div>`;
+    
+    events.filter(e => e.date_str === ds).forEach(e => {
+      const dot = document.createElement('div');
+      dot.className = 'event-dot';
+      dayEl.appendChild(dot);
+    });
+    grid.appendChild(dayEl);
+  }
+  renderJournal();
+}
+
+function renderJournal() {
+  const container = document.getElementById('journalView');
+  container.innerHTML = '<h3>Dernières activités</h3><br>';
+  events.slice().reverse().slice(0,10).forEach(e => {
+    container.innerHTML += `<div class="journal-item">
+      <b>${e.title}</b><br>
+      <small>Prévu le : ${e.date_str}</small><br>
+      <small style="color:var(--primary)">Par ${e.created_by_name}</small>
+    </div>`;
   });
-  document.getElementById('dayModalOverlay').classList.add('show');
 }
-function closeModal(){document.getElementById('modalOverlay').classList.remove('show');}
-function closeDayModal(){document.getElementById('dayModalOverlay').classList.remove('show');}
-function openAddModal(ds){editingEventId=null;document.getElementById('evDate').value=ds||toDS(new Date());document.getElementById('modalOverlay').classList.add('show');}
-function deleteEvent(id){if(confirm('Supprimer ?'))fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id})}).then(()=>loadEvents());}
-function openEditModal(id){const ev=events.find(e=>e.id===id);if(!ev)return;editingEventId=id;document.getElementById('evTitle').value=ev.title;document.getElementById('evDate').value=ev.date_str;document.getElementById('modalOverlay').classList.add('show');}
-function openInviteModal() { document.getElementById('inviteModalOverlay').classList.add('show'); }
-function closeInviteModal() { document.getElementById('inviteModalOverlay').classList.remove('show'); }
-async function doInvite() {
-    const invite_email = document.getElementById('inviteEmail').value;
-    const invite_name = document.getElementById('inviteName').value;
-    await fetch('/api/auth', {method: 'POST',headers: {'Content-Type': 'application/json'},body: JSON.stringify({ action: 'invite', family_id: currentUser.family_id, invite_email, invite_name })});
-    alert('Invitation envoyée');closeInviteModal();
+
+function changeMonth(step) { curDate.setMonth(curDate.getMonth() + step); render(); }
+function setView(v) {
+  document.getElementById('mainView').style.display = v === 'month' ? 'block' : 'none';
+  document.getElementById('journalView').style.display = v === 'journal' ? 'block' : 'none';
+  document.getElementById('tabMonth').classList.toggle('active', v === 'month');
+  document.getElementById('tabJournal').classList.toggle('active', v === 'journal');
 }
-function addEventForDay(){closeDayModal();openAddModal(selectedDay);}
+function openModal() { 
+  document.getElementById('evDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('modalOverlay').classList.add('show'); 
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 </script>
 </body>
 </html>
