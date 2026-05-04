@@ -142,7 +142,8 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .admin-empty{text-align:center;color:var(--muted);font-size:13px;padding:24px;font-weight:600;}
 .badge-pending{display:inline-block;background:#FEF3C7;color:#B45309;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;margin-left:4px;}
 .btn-invite-partner{background:#FCE7F3;border:none;color:#BE185D;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
-.journal-card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.journal-card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.1s; border-radius: 16px; }
+.journal-card:active { transform: scale(0.98); }
 </style>
 </head>
 <body>
@@ -460,6 +461,11 @@ function setView(view){
   document.getElementById('tabMonth').className='vtab'+(view==='month'?' active':'');
   document.getElementById('tabWeek').className='vtab'+(view==='week'?' active':'');
   document.getElementById('tabJournal').className='vtab'+(view==='journal'?' active':'');
+  
+  const isJournal = (view === 'journal');
+  document.querySelector('.month-nav').style.display = isJournal ? 'none' : 'flex';
+  document.querySelector('.legend').style.display = isJournal ? 'none' : 'flex';
+
   document.getElementById('monthView').style.display=view==='month'?'block':'none';
   document.getElementById('monthEventsSection').style.display=view==='month'?'block':'none';
   document.getElementById('weekView').style.display=view==='week'?'block':'none';
@@ -600,8 +606,9 @@ function openDayModal(ds,d){
   const badge=document.getElementById('dayModalBadge');badge.textContent=wb.lbl;badge.className='day-modal-badge '+wb.cls;
   const evs=getEventsForDay(ds);const list=document.getElementById('dayEventsList');list.innerHTML='';
   evs.forEach(ev=>{
+    const addedBy = ev.created_by === currentUser.email ? 'vous' : (ev.created_by_name || 'votre partenaire');
     const el=document.createElement('div');el.className='day-event-item';
-    el.innerHTML='<div style="font-size:24px">'+(TYPE_ICONS[ev.type]||'📅')+'</div><div class="day-event-info"><div class="day-event-title">'+ev.title+'</div>'+(ev.time_str?'<div class="day-event-time">⏰ '+ev.time_str+'</div>':'')+'<div class="day-event-by">Ajouté par '+(ev.created_by===currentUser.email?'vous':'votre partenaire')+'</div></div>';
+    el.innerHTML='<div style="font-size:24px">'+(TYPE_ICONS[ev.type]||'📅')+'</div><div class="day-event-info"><div class="day-event-title">'+ev.title+'</div>'+(ev.time_str?'<div class="day-event-time">⏰ '+ev.time_str+'</div>':'')+'<div class="day-event-by">Ajouté par '+addedBy+'</div></div>';
     const actions=document.createElement('div');actions.className='day-event-actions';
     const btnEdit=document.createElement('button');btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.onclick=()=>openEditModal(ev.id);
     const btnDel=document.createElement('button');btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.onclick=()=>deleteEvent(ev.id);
@@ -622,7 +629,7 @@ function renderActivity(){
   sortedByCreation.slice(0,15).forEach(ev=>{
     const row=document.createElement('div');row.className='month-event-row journal-card';
     const eventDateDisplay = formatSmartDate(ev.date_str);
-    const addedBy = ev.created_by === currentUser.email ? 'Moi' : (ev.created_by_name || 'Partenaire');
+    const addedBy = ev.created_by === currentUser.email ? 'Moi' : (ev.created_by_name || 'mon partenaire');
     
     row.innerHTML=`<div class="mer-info">
       <div class="mer-title">${TYPE_ICONS[ev.type] || '📅'} ${ev.title}</div>
