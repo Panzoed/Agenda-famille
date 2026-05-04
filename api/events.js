@@ -9,7 +9,11 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const { action, id, title, description, date_str, time_str, type, created_by, created_by_name, family_id } = req.body || {};
+  const { 
+    action, id, title, description, date_str, time_str, 
+    type, created_by, created_by_name, family_id, 
+    repeat_count // Nouveau paramètre : nombre de mois à répéter
+  } = req.body || {};
 
   // ─── LISTE (filtrée par famille) ─────────────────────────────────────────
   if (action === 'list') {
@@ -19,21 +23,40 @@ module.exports = async (req, res) => {
     return res.json(data || []);
   }
 
-  // ─── AJOUTER ─────────────────────────────────────────────────────────────
+  // ─── AJOUTER (avec option de répétition) ──────────────────────────────────
   if (action === 'add') {
-    const { data, error } = await supabase.from('agenda_events').insert({
-      title,
-      description,
-      date_str,
-      time_str,
-      type: type || 'task',
-      created_by,
-      family_id: family_id || null
-    }).select().single();
+    const iterations = parseInt(repeat_count) || 1;
+    const eventsToInsert = [];
+
+    // On prépare les événements pour les X mois demandés
+    for (let i = 0; i < iterations; i++) {
+      let d = new Date(date_str + 'T12:00:00');
+      d.setMonth(d.getMonth() + i);
+
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const newDateStr = `${yyyy}-${mm}-${dd}`;
+
+      eventsToInsert.push({
+        title,
+        description,
+        date_str: newDateStr,
+        time_str,
+        type: type || 'task',
+        created_by,
+        family_id: family_id || null
+      });
+    }
+
+    const { data, error } = await supabase
+      .from('agenda_events')
+      .insert(eventsToInsert)
+      .select();
 
     if (error) return res.status(500).json({ error: 'Erreur ajout' });
 
-    // Notifier les autres membres de la famille
+    // Notifier les autres membres de la famille (on n'envoie qu'un mail récapitulatif)
     if (family_id) {
       const { data: members } = await supabase
         .from('agenda_users')
@@ -47,6 +70,8 @@ module.exports = async (req, res) => {
           weekday: 'long', day: 'numeric', month: 'long'
         });
 
+        const repeatText = iterations > 1 ? ` (Répété sur ${iterations} mois)` : '';
+
         for (const member of members) {
           await fetch('https://api.brevo.com/v3/smtp/email', {
             method: 'POST',
@@ -59,10 +84,10 @@ module.exports = async (req, res) => {
                 <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px">
                   <h2 style="color:#F59E0B">📅 Agenda Famille</h2>
                   <p>Bonjour ${member.name},</p>
-                  <p><strong>${created_by_name}</strong> a ajouté un événement :</p>
+                  <p><strong>${created_by_name}</strong> a ajouté un événement${repeatText} :</p>
                   <div style="background:#FEF3C7;border-left:4px solid #F59E0B;padding:12px 16px;border-radius:8px;margin:16px 0">
                     <div style="font-size:18px;font-weight:bold;color:#92400E">${title}</div>
-                    <div style="color:#B45309;margin-top:4px">📆 ${dateFormatted}${time_str ? ' à ' + time_str : ''}</div>
+                    <div style="color:#B45309;margin-top:4px">📆 À partir du ${dateFormatted}${time_str ? ' à ' + time_str : ''}</div>
                     ${description ? `<div style="color:#78350F;margin-top:4px">📝 ${description}</div>` : ''}
                   </div>
                   <p style="color:#9CA3AF;font-size:11px">Créé par Emmanuel Acabo</p>
@@ -74,7 +99,7 @@ module.exports = async (req, res) => {
       }
     }
 
-    return res.json(data);
+    return res.json(data[0]);
   }
 
   // ─── MODIFIER ─────────────────────────────────────────────────────────────
