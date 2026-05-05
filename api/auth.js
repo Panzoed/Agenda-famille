@@ -60,7 +60,6 @@ module.exports = async (req, res) => {
       const partnerEmailClean = partner_email.toLowerCase().trim();
       const { data: existingPartner } = await supabase.from('agenda_users').select('id').eq('email', partnerEmailClean).single();
       if (!existingPartner) {
-        // Générer un token d'invitation simple
         const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
         await supabase.from('agenda_users').insert({
           name: 'Partenaire', email: partnerEmailClean,
@@ -69,7 +68,6 @@ module.exports = async (req, res) => {
           invite_token: token
         });
 
-        // Email d'invitation au partenaire
         await fetch('https://api.brevo.com/v3/smtp/email', {
           method: 'POST',
           headers: { 'api-key': BREVO_KEY, 'Content-Type': 'application/json' },
@@ -81,7 +79,7 @@ module.exports = async (req, res) => {
               <h2 style="color:#F59E0B">👨‍👩‍👧 Agenda Famille</h2>
               <p>Bonjour,</p>
               <p><strong>${name}</strong> vous a invité(e) à partager son agenda famille !</p>
-              <p>Cliquez sur le bouton ci-dessous pour définir votre mot de passe et accéder à l'agenda :</p>
+              <p>Cliquez sur le bouton ci-dessous pour définir votre mot de passe :</p>
               <a href="${APP_URL}?token=${token}&email=${partnerEmailClean}" style="display:inline-block;margin-top:16px;background:#F59E0B;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Rejoindre l'agenda 🚀</a>
               <p style="color:#9CA3AF;font-size:11px;margin-top:24px;">Créé par Emmanuel Acabo</p>
             </div>`
@@ -115,7 +113,7 @@ module.exports = async (req, res) => {
     return res.json({ ok: true, message: 'Demande envoyée, en attente d\'approbation' });
   }
 
-  // ─── DÉFINIR MOT DE PASSE (invitation partenaire) ─────────────────────────
+  // ─── DÉFINIR MOT DE PASSE (invitation partenaire) ────────────────────────
   if (action === 'set_password') {
     const { token } = req.body;
     const emailInvite = (req.body.email || '').toLowerCase().trim();
