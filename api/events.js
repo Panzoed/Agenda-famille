@@ -4,18 +4,66 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 const BREVO_KEY = process.env.BREVO_KEY;
 const EMAIL_ADMIN = 'siciliano_messinese@hotmail.it';
 
+function toDS(date) {
+  return date.getFullYear() + '-'
+    + String(date.getMonth() + 1).padStart(2, '0') + '-'
+    + String(date.getDate()).padStart(2, '0');
+}
+
+function buildDates(date_str, repeat_mode) {
+  const dates = [];
+  const base = new Date(date_str + 'T12:00:00');
+  const endOfYear = new Date(base.getFullYear(), 11, 31);
+
+  if (!repeat_mode || repeat_mode === 'none') {
+    return [date_str];
+  }
+
+  if (repeat_mode === 'weekly') {
+    // Chaque semaine jusqu'à fin d'année
+    let cur = new Date(base);
+    while (cur <= endOfYear) {
+      dates.push(toDS(cur));
+      cur.setDate(cur.getDate() + 7);
+    }
+    return dates;
+  }
+
+  if (repeat_mode === 'biweekly') {
+    // Tous les 15 jours jusqu'à fin d'année
+    let cur = new Date(base);
+    while (cur <= endOfYear) {
+      dates.push(toDS(cur));
+      cur.setDate(cur.getDate() + 14);
+    }
+    return dates;
+  }
+
+  if (repeat_mode === 'monthly') {
+    // Chaque mois jusqu'à fin d'année
+    let cur = new Date(base);
+    while (cur <= endOfYear) {
+      dates.push(toDS(cur));
+      cur.setMonth(cur.getMonth() + 1);
+    }
+    return dates;
+  }
+
+  return [date_str];
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const { 
-    action, id, title, description, date_str, time_str, 
-    type, created_by, created_by_name, family_id, 
-    repeat_count // Nouveau paramètre : nombre de mois à répéter
+  const {
+    action, id, title, description, date_str, time_str,
+    type, created_by, created_by_name, family_id,
+    repeat_mode // 'none' | 'weekly' | 'biweekly' | 'monthly'
   } = req.body || {};
 
-  // ─── LISTE (filtrée par famille) ─────────────────────────────────────────
+  // ─── LISTE ───────────────────────────────────────────────────────────────
   if (action === 'list') {
     let query = supabase.from('agenda_events').select('*').order('date_str').order('time_str');
     if (family_id) query = query.eq('family_id', family_id);
@@ -23,31 +71,20 @@ module.exports = async (req, res) => {
     return res.json(data || []);
   }
 
-  // ─── AJOUTER (avec option de répétition) ──────────────────────────────────
+  // ─── AJOUTER ─────────────────────────────────────────────────────────────
   if (action === 'add') {
-    const iterations = parseInt(repeat_count) || 1;
-    const eventsToInsert = [];
+    const dates = buildDates(date_str, repeat_mode);
 
-    // On prépare les événements pour les X mois demandés
-    for (let i = 0; i < iterations; i++) {
-      let d = new Date(date_str + 'T12:00:00');
-      d.setMonth(d.getMonth() + i);
-
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      const newDateStr = `${yyyy}-${mm}-${dd}`;
-
-      eventsToInsert.push({
-        title,
-        description,
-        date_str: newDateStr,
-        time_str,
-        type: type || 'task',
-        created_by,
-        family_id: family_id || null
-      });
-    }
+    const eventsToInsert = dates.map(d => ({
+      title, description,
+      date_str: d,
+      time_str,
+      type: type || 'task',
+      created_by,
+      created_by_name,
+      family_id: family_id || null,
+      repeat_mode: repeat_mode || 'none'
+    }));
 
     const { data, error } = await supabase
       .from('agenda_events')
@@ -56,7 +93,7 @@ module.exports = async (req, res) => {
 
     if (error) return res.status(500).json({ error: 'Erreur ajout' });
 
-    // Notifier les autres membres de la famille (on n'envoie qu'un mail récapitulatif)
+    // Notifier les membres de la famille
     if (family_id) {
       const { data: members } = await supabase
         .from('agenda_users')
@@ -69,8 +106,13 @@ module.exports = async (req, res) => {
         const dateFormatted = new Date(date_str + 'T12:00:00').toLocaleDateString('fr-BE', {
           weekday: 'long', day: 'numeric', month: 'long'
         });
-
-        const repeatText = iterations > 1 ? ` (Répété sur ${iterations} mois)` : '';
+        const repeatLabels = {
+          weekly: ' (chaque semaine)',
+          biweekly: ' (tous les 15 jours)',
+          monthly: ' (chaque mois)',
+          none: ''
+        };
+        const repeatText = repeatLabels[repeat_mode] || '';
 
         for (const member of members) {
           await fetch('https://api.brevo.com/v3/smtp/email', {
