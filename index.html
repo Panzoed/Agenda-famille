@@ -389,20 +389,18 @@ function buildColorPicker(){
 // ─── MÉTÉO IRM ────────────────────────────────────────────────────────────
 async function loadMeteo(){
   try{
-    // IRM open data - station Bruxelles
-    const res=await fetch('https://opendata.meteo.be/service/obs/aws/json?station=6447&obs=ta,rh,ws,wd,precip&period=last');
-    if(!res.ok)throw new Error();
+    const res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=50.85&longitude=4.35&current=temperature_2m,weathercode,windspeed_10m&timezone=Europe/Brussels&models=best_match');
     const data=await res.json();
-    const temp=data?.features?.[0]?.properties?.ta;
-    const bar=document.getElementById('meteoBar');
-    if(temp!==undefined){
-      const t=Math.round(temp);
-      const icon=t>25?'☀️':t>15?'🌤️':t>5?'🌥️':'❄️';
-      bar.innerHTML=`${icon} <strong>${t}°C</strong> <span>Bruxelles — ${new Date().toLocaleDateString('fr-BE',{weekday:'long',day:'numeric',month:'long'})}</span>`;
-    } else {
-      loadMeteoFallback();
-    }
-  }catch(e){loadMeteoFallback();}
+    const temp=Math.round(data.current.temperature_2m);
+    const wind=Math.round(data.current.windspeed_10m);
+    const code=data.current.weathercode;
+    const icons={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'❄️',73:'❄️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
+    const icon=icons[code]||'🌤️';
+    const date=new Date().toLocaleDateString('fr-BE',{weekday:'long',day:'numeric',month:'long'});
+    document.getElementById('meteoBar').innerHTML=`${icon} <strong>${temp}°C</strong> 💨 ${wind} km/h <span>${date} — Source : IRM/Open-Meteo</span>`;
+  }catch(e){
+    document.getElementById('meteoBar').innerHTML='🌤️ <span>Météo indisponible</span>';
+  }
 }
 
 async function loadMeteoFallback(){
