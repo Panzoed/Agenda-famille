@@ -14,27 +14,22 @@ function buildDates(date_str, repeat_mode) {
   const base = new Date(date_str + 'T12:00:00');
   const endOfYear = new Date(base.getFullYear(), 11, 31);
   const dates = [];
-
   if (!repeat_mode || repeat_mode === 'none') return [date_str];
-
   if (repeat_mode === 'weekly') {
     let cur = new Date(base);
     while (cur <= endOfYear) { dates.push(toDS(cur)); cur.setDate(cur.getDate() + 7); }
     return dates;
   }
-
   if (repeat_mode === 'biweekly') {
     let cur = new Date(base);
     while (cur <= endOfYear) { dates.push(toDS(cur)); cur.setDate(cur.getDate() + 14); }
     return dates;
   }
-
   if (repeat_mode === 'monthly') {
     let cur = new Date(base);
     while (cur <= endOfYear) { dates.push(toDS(cur)); cur.setMonth(cur.getMonth() + 1); }
     return dates;
   }
-
   return [date_str];
 }
 
@@ -45,12 +40,13 @@ module.exports = async (req, res) => {
 
   const {
     action, id, title, description, date_str, time_str,
-    type, created_by, created_by_name, family_id, repeat_mode
+    type, created_by, created_by_name, family_id,
+    repeat_mode, pinned, color
   } = req.body || {};
 
   // ─── LISTE ───────────────────────────────────────────────────────────────
   if (action === 'list') {
-    let query = supabase.from('agenda_events').select('*').order('date_str').order('time_str');
+    let query = supabase.from('agenda_events').select('*').order('pinned', { ascending: false }).order('date_str').order('time_str');
     if (family_id) query = query.eq('family_id', family_id);
     const { data } = await query;
     return res.json(data || []);
@@ -59,42 +55,26 @@ module.exports = async (req, res) => {
   // ─── AJOUTER ─────────────────────────────────────────────────────────────
   if (action === 'add') {
     const dates = buildDates(date_str, repeat_mode);
-
     const eventsToInsert = dates.map(d => ({
-      title,
-      description,
-      date_str: d,
-      time_str,
+      title, description,
+      date_str: d, time_str,
       type: type || 'task',
-      created_by,
-      created_by_name: created_by_name || '',
+      created_by, created_by_name: created_by_name || '',
       family_id: family_id || null,
-      repeat_mode: repeat_mode || 'none'
+      repeat_mode: repeat_mode || 'none',
+      pinned: pinned || false,
+      color: color || '#EC4899'
     }));
 
-    const { data, error } = await supabase
-      .from('agenda_events')
-      .insert(eventsToInsert)
-      .select();
-
+    const { data, error } = await supabase.from('agenda_events').insert(eventsToInsert).select();
     if (error) return res.status(500).json({ error: 'Erreur ajout' });
 
-    // Notifier les membres de la famille
     if (family_id) {
-      const { data: members } = await supabase
-        .from('agenda_users')
-        .select('email, name')
-        .eq('family_id', family_id)
-        .eq('status', 'approved')
-        .neq('email', created_by);
-
+      const { data: members } = await supabase.from('agenda_users').select('email, name').eq('family_id', family_id).eq('status', 'approved').neq('email', created_by);
       if (members && members.length > 0) {
-        const dateFormatted = new Date(date_str + 'T12:00:00').toLocaleDateString('fr-BE', {
-          weekday: 'long', day: 'numeric', month: 'long'
-        });
+        const dateFormatted = new Date(date_str + 'T12:00:00').toLocaleDateString('fr-BE', { weekday: 'long', day: 'numeric', month: 'long' });
         const repeatLabels = { weekly: ' (chaque semaine)', biweekly: ' (tous les 15 jours)', monthly: ' (chaque mois)', none: '' };
         const repeatText = repeatLabels[repeat_mode] || '';
-
         for (const member of members) {
           await fetch('https://api.brevo.com/v3/smtp/email', {
             method: 'POST',
@@ -107,7 +87,7 @@ module.exports = async (req, res) => {
                 <h2 style="color:#F59E0B">📅 Agenda Famille</h2>
                 <p>Bonjour ${member.name},</p>
                 <p><strong>${created_by_name}</strong> a ajouté un événement${repeatText} :</p>
-                <div style="background:#FEF3C7;border-left:4px solid #F59E0B;padding:12px 16px;border-radius:8px;margin:16px 0">
+                <div style="background:#FEF3C7;border-left:4px solid ${color || '#EC4899'};padding:12px 16px;border-radius:8px;margin:16px 0">
                   <div style="font-size:18px;font-weight:bold;color:#92400E">${title}</div>
                   <div style="color:#B45309;margin-top:4px">📆 À partir du ${dateFormatted}${time_str ? ' à ' + time_str : ''}</div>
                   ${description ? `<div style="color:#78350F;margin-top:4px">📝 ${description}</div>` : ''}
@@ -119,18 +99,21 @@ module.exports = async (req, res) => {
         }
       }
     }
-
     return res.json(data[0]);
   }
 
   // ─── MODIFIER ─────────────────────────────────────────────────────────────
   if (action === 'update') {
-    const { data } = await supabase
-      .from('agenda_events')
-      .update({ title, description, date_str, time_str, type })
-      .eq('id', id)
-      .select()
-      .single();
+    const { data } = await supabase.from('agenda_events')
+      .update({ title, description, date_str, time_str, type, pinned: pinned || false, color: color || '#EC4899' })
+      .eq('id', id).select().single();
+    return res.json(data);
+  }
+
+  // ─── ÉPINGLER/DÉSÉPINGLER ─────────────────────────────────────────────────
+  if (action === 'toggle_pin') {
+    const { data: ev } = await supabase.from('agenda_events').select('pinned').eq('id', id).single();
+    const { data } = await supabase.from('agenda_events').update({ pinned: !ev.pinned }).eq('id', id).select().single();
     return res.json(data);
   }
 
