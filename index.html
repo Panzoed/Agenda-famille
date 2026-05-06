@@ -56,6 +56,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .btn-admin{background:#EFF6FF;border:none;color:#3B82F6;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
 .btn-invite-partner{background:#FCE7F3;border:none;color:#BE185D;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
 .btn-theme{background:var(--card2);border:2px solid var(--border);color:var(--text);padding:7px 10px;border-radius:8px;font-size:14px;cursor:pointer;}
+.btn-settings{background:var(--card2);border:2px solid var(--border);color:var(--text);padding:7px 10px;border-radius:8px;font-size:14px;cursor:pointer;}
 .search-bar{padding:10px 16px 0;}
 .search-input{width:100%;background:var(--card);border:2px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none;}
 .search-input:focus{border-color:var(--primary);}
@@ -159,6 +160,11 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .meteo-bar span{color:var(--muted);font-weight:600;}
 .meteo-week-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card2);border-radius:12px;}
 .meteo-week-item.today{border:2px solid var(--primary);}
+/* Suggestions ville */
+.city-suggestions{position:absolute;background:var(--card);border:2px solid var(--border);border-radius:12px;width:calc(100% - 28px);z-index:10;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px var(--shadow);margin-top:2px;}
+.city-suggestion-item{padding:10px 14px;cursor:pointer;font-size:14px;font-weight:600;border-bottom:1px solid var(--border);}
+.city-suggestion-item:last-child{border-bottom:none;}
+.city-suggestion-item:hover{background:var(--card2);}
 </style>
 </head>
 <body>
@@ -210,6 +216,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
     </div>
     <div class="topbar-right">
       <button class="btn-theme" onclick="toggleTheme()" id="btnTheme">🌙</button>
+      <button class="btn-settings" onclick="openSettings()">⚙️</button>
       <button class="btn-invite-partner" onclick="openInviteModal()">➕</button>
       <button class="btn-admin" id="btnAdmin" onclick="openAdmin()" style="display:none">🔧 <span class="badge-pending" id="pendingBadge" style="display:none">0</span></button>
       <button class="btn-deconnect" onclick="doLogout()">⏻</button>
@@ -257,6 +264,20 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
   <div class="journal-view" id="journalView" style="display:none;padding:0 16px 16px;"></div>
   <button class="fab" onclick="openAddModal()">+</button>
   <button class="fab-mic" id="fabMic" onclick="startVoice()">🎤</button>
+</div>
+
+<!-- Modal Paramètres -->
+<div class="modal-overlay" id="settingsOverlay" onclick="closeSettings(event)">
+  <div class="modal">
+    <div class="modal-title">⚙️ Paramètres</div>
+    <div class="modal-group" style="position:relative;">
+      <label>🌤️ Ma ville (météo)</label>
+      <input type="text" id="cityInput" placeholder="Ex: Gilly, Bruxelles..." oninput="searchCity(this.value)" autocomplete="off">
+      <div class="city-suggestions" id="citySuggestions" style="display:none;"></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:14px;">Ville actuelle : <strong id="currentCityLabel">Bruxelles</strong></div>
+    <button class="btn-cancel-modal" onclick="closeSettings()">Fermer</button>
+  </div>
 </div>
 
 <!-- Modal Événement -->
@@ -357,6 +378,8 @@ const COLORS=['#EC4899','#F59E0B','#3B82F6','#16A34A','#8B5CF6','#EF4444','#06B6
 const METEO_ICONS={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'❄️',73:'❄️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
 const JOURS=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
 let currentUser=null,events=[],curYear=new Date().getFullYear(),curMonth=new Date().getMonth(),curView='month',curWeekStart=null,selectedDay=null,editingEventId=null,selectedColor='#EC4899';
+// Coordonnées météo — chargées depuis localStorage ou Bruxelles par défaut
+let meteoLat=50.85,meteoLon=4.35,meteoCity='Bruxelles';
 const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const MONTHS_SHORT=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 const DAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
@@ -371,19 +394,65 @@ FERMETURES.add('2026-11-02');
 function toggleTheme(){const html=document.documentElement;const isDark=html.getAttribute('data-theme')==='dark';html.setAttribute('data-theme',isDark?'light':'dark');document.getElementById('btnTheme').textContent=isDark?'🌙':'☀️';localStorage.setItem('agenda-theme',isDark?'light':'dark');}
 function initTheme(){const saved=localStorage.getItem('agenda-theme')||'light';document.documentElement.setAttribute('data-theme',saved);document.getElementById('btnTheme').textContent=saved==='dark'?'☀️':'🌙';}
 
+// ─── VILLE MÉTÉO ──────────────────────────────────────────────────────────
+function initCity(){
+  const saved=localStorage.getItem('agenda-city');
+  if(saved){const c=JSON.parse(saved);meteoLat=c.lat;meteoLon=c.lon;meteoCity=c.name;}
+}
+
+function openSettings(){
+  document.getElementById('cityInput').value='';
+  document.getElementById('citySuggestions').style.display='none';
+  document.getElementById('currentCityLabel').textContent=meteoCity;
+  document.getElementById('settingsOverlay').classList.add('show');
+}
+function closeSettings(e){if(!e||e.target===document.getElementById('settingsOverlay')){document.getElementById('settingsOverlay').classList.remove('show');document.getElementById('citySuggestions').style.display='none';}}
+
+let citySearchTimer=null;
+async function searchCity(q){
+  clearTimeout(citySearchTimer);
+  const sug=document.getElementById('citySuggestions');
+  if(!q||q.length<2){sug.style.display='none';return;}
+  citySearchTimer=setTimeout(async()=>{
+    try{
+      const res=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=fr&format=json`);
+      const data=await res.json();
+      sug.innerHTML='';
+      if(!data.results||!data.results.length){sug.innerHTML='<div class="city-suggestion-item" style="color:var(--muted);">Aucun résultat</div>';sug.style.display='block';return;}
+      data.results.forEach(r=>{
+        const item=document.createElement('div');
+        item.className='city-suggestion-item';
+        const country=r.country_code==='BE'?'🇧🇪':r.country_code==='FR'?'🇫🇷':r.country_code==='LU'?'🇱🇺':r.country_code==='NL'?'🇳🇱':'🌍';
+        item.innerHTML=`${country} <strong>${r.name}</strong> <span style="color:var(--muted);font-size:12px;">${r.admin1||''}</span>`;
+        item.onclick=()=>{
+          meteoLat=r.latitude;meteoLon=r.longitude;meteoCity=r.name;
+          localStorage.setItem('agenda-city',JSON.stringify({lat:r.latitude,lon:r.longitude,name:r.name}));
+          document.getElementById('cityInput').value='';
+          sug.style.display='none';
+          document.getElementById('currentCityLabel').textContent=r.name;
+          loadMeteo();
+          closeSettings();
+        };
+        sug.appendChild(item);
+      });
+      sug.style.display='block';
+    }catch(e){sug.style.display='none';}
+  },400);
+}
+
 // ─── COULEURS ─────────────────────────────────────────────────────────────
 function buildColorPicker(){const picker=document.getElementById('colorPicker');picker.innerHTML='';COLORS.forEach(c=>{const dot=document.createElement('div');dot.className='color-dot'+(c===selectedColor?' selected':'');dot.style.background=c;dot.onclick=()=>{selectedColor=c;document.getElementById('evColor').value=c;buildColorPicker();};picker.appendChild(dot);});}
 
 // ─── MÉTÉO ────────────────────────────────────────────────────────────────
 async function loadMeteo(){
   try{
-    const res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=50.85&longitude=4.35&current=temperature_2m,weathercode,windspeed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max&hourly=temperature_2m,weathercode&timezone=Europe/Brussels&models=best_match');
+    const res=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${meteoLat}&longitude=${meteoLon}&current=temperature_2m,weathercode,windspeed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max&hourly=temperature_2m,weathercode&timezone=Europe/Brussels&models=best_match`);
     const data=await res.json();
     const temp=Math.round(data.current.temperature_2m);
     const wind=Math.round(data.current.windspeed_10m);
     const icon=METEO_ICONS[data.current.weathercode]||'🌤️';
     const date=new Date().toLocaleDateString('fr-BE',{weekday:'long',day:'numeric',month:'long'});
-    document.getElementById('meteoBar').innerHTML=`${icon} <strong>${temp}°C</strong> 💨 ${wind} km/h <span>${date}</span><span style="margin-left:auto;font-size:11px;color:var(--primary);font-weight:800;background:var(--card2);padding:4px 10px;border-radius:8px;">📅 Semaine</span>`;
+    document.getElementById('meteoBar').innerHTML=`${icon} <strong>${temp}°C</strong> 💨 ${wind} km/h <span>${meteoCity} · ${date}</span><span style="margin-left:auto;font-size:11px;color:var(--primary);font-weight:800;background:var(--card2);padding:4px 10px;border-radius:8px;">📅 Semaine</span>`;
     window.meteoWeekData=data.daily;
     window.meteoHourlyData=data.hourly;
   }catch(e){
@@ -396,7 +465,7 @@ function openMeteoModal(){
   const daily=window.meteoWeekData;
   const hourly=window.meteoHourlyData;
   const content=document.getElementById('meteoWeekContent');
-  content.innerHTML='';
+  content.innerHTML=`<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">📍 ${meteoCity}</div>`;
   const todayStr=toDS(new Date());
   daily.time.forEach((dateStr,i)=>{
     const d=new Date(dateStr+'T12:00:00');
@@ -407,8 +476,6 @@ function openMeteoModal(){
     const tmin=Math.round(daily.temperature_2m_min[i]);
     const rain=daily.precipitation_probability_max[i]||0;
     const isToday=dateStr===todayStr;
-
-    // Matin 9h et après-midi 15h
     let matinIcon='',matinTemp='',apremIcon='',apremTemp='';
     if(hourly){
       const idx9=hourly.time.findIndex(t=>t===dateStr+'T09:00');
@@ -416,7 +483,6 @@ function openMeteoModal(){
       if(idx9>=0){matinIcon=METEO_ICONS[hourly.weathercode[idx9]]||'🌤️';matinTemp=Math.round(hourly.temperature_2m[idx9])+'°';}
       if(idx15>=0){apremIcon=METEO_ICONS[hourly.weathercode[idx15]]||'🌤️';apremTemp=Math.round(hourly.temperature_2m[idx15])+'°';}
     }
-
     const row=document.createElement('div');
     row.className='meteo-week-item'+(isToday?' today':'');
     row.innerHTML=`
@@ -450,7 +516,7 @@ function parseVoiceCommand(text){const t=text.toLowerCase().trim();let title=t,d
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────
 window.onload=()=>{
-  initTheme();buildColorPicker();
+  initTheme();initCity();buildColorPicker();
   const params=new URLSearchParams(window.location.search);
   const token=params.get('token');const email=params.get('email');
   if(token&&email){document.getElementById('loginForm').style.display='none';document.getElementById('registerForm').style.display='none';document.getElementById('setPassForm').style.display='block';document.getElementById('authSub').textContent='Définissez votre mot de passe';}
