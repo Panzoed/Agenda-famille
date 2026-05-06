@@ -424,12 +424,12 @@ function openMeteoModal(){
         ${isToday?`<span style="color:var(--primary)">Auj.</span>`:`<span>${jour}</span>`}
         <br><span style="font-size:10px;color:var(--muted);font-weight:600;">${dateLabel}</span>
       </div>
-      <div style="font-size:26px;">${iconDay}</div>
       <div style="flex:1;">
         <div style="font-weight:800;font-size:14px;">🌡️ ${tmax}° <span style="color:var(--muted);font-size:12px;">/ ${tmin}°</span> · 💧${rain}%</div>
-        <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;">
-          ${matinIcon?`<span style="font-size:11px;background:#DBEAFE;color:#1D4ED8;padding:2px 8px;border-radius:6px;font-weight:700;">🌅 ${matinIcon} ${matinTemp}</span>`:''}
-          ${apremIcon?`<span style="font-size:11px;background:#FEF3C7;color:#B45309;padding:2px 8px;border-radius:6px;font-weight:700;">🌆 ${apremIcon} ${apremTemp}</span>`:''}
+        <div style="display:flex;align-items:center;gap:4px;margin-top:6px;">
+          ${matinIcon?`<span style="font-size:24px;">${matinIcon}</span><span style="font-size:12px;font-weight:800;color:#1D4ED8;">${matinTemp}</span>`:''}
+          ${matinIcon&&apremIcon?`<span style="font-size:16px;color:var(--muted);margin:0 4px;">›</span>`:''}
+          ${apremIcon?`<span style="font-size:24px;">${apremIcon}</span><span style="font-size:12px;font-weight:800;color:#B45309;">${apremTemp}</span>`:''}
         </div>
       </div>
     `;
@@ -455,7 +455,6 @@ window.onload=()=>{
   const token=params.get('token');const email=params.get('email');
   if(token&&email){document.getElementById('loginForm').style.display='none';document.getElementById('registerForm').style.display='none';document.getElementById('setPassForm').style.display='block';document.getElementById('authSub').textContent='Définissez votre mot de passe';}
   else{const saved=sessionStorage.getItem('agendaUser');if(saved){currentUser=JSON.parse(saved);showApp();}}
-  // Enter sur email et mot de passe
   document.getElementById('loginEmail').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
   document.getElementById('loginPassword').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 };
