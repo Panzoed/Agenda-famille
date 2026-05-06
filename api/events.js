@@ -11,41 +11,27 @@ function toDS(date) {
 }
 
 function buildDates(date_str, repeat_mode) {
-  const dates = [];
   const base = new Date(date_str + 'T12:00:00');
   const endOfYear = new Date(base.getFullYear(), 11, 31);
+  const dates = [];
 
-  if (!repeat_mode || repeat_mode === 'none') {
-    return [date_str];
-  }
+  if (!repeat_mode || repeat_mode === 'none') return [date_str];
 
   if (repeat_mode === 'weekly') {
-    // Chaque semaine jusqu'à fin d'année
     let cur = new Date(base);
-    while (cur <= endOfYear) {
-      dates.push(toDS(cur));
-      cur.setDate(cur.getDate() + 7);
-    }
+    while (cur <= endOfYear) { dates.push(toDS(cur)); cur.setDate(cur.getDate() + 7); }
     return dates;
   }
 
   if (repeat_mode === 'biweekly') {
-    // Tous les 15 jours jusqu'à fin d'année
     let cur = new Date(base);
-    while (cur <= endOfYear) {
-      dates.push(toDS(cur));
-      cur.setDate(cur.getDate() + 14);
-    }
+    while (cur <= endOfYear) { dates.push(toDS(cur)); cur.setDate(cur.getDate() + 14); }
     return dates;
   }
 
   if (repeat_mode === 'monthly') {
-    // Chaque mois jusqu'à fin d'année
     let cur = new Date(base);
-    while (cur <= endOfYear) {
-      dates.push(toDS(cur));
-      cur.setMonth(cur.getMonth() + 1);
-    }
+    while (cur <= endOfYear) { dates.push(toDS(cur)); cur.setMonth(cur.getMonth() + 1); }
     return dates;
   }
 
@@ -59,8 +45,7 @@ module.exports = async (req, res) => {
 
   const {
     action, id, title, description, date_str, time_str,
-    type, created_by, created_by_name, family_id,
-    repeat_mode // 'none' | 'weekly' | 'biweekly' | 'monthly'
+    type, created_by, created_by_name, family_id, repeat_mode
   } = req.body || {};
 
   // ─── LISTE ───────────────────────────────────────────────────────────────
@@ -76,12 +61,13 @@ module.exports = async (req, res) => {
     const dates = buildDates(date_str, repeat_mode);
 
     const eventsToInsert = dates.map(d => ({
-      title, description,
+      title,
+      description,
       date_str: d,
       time_str,
       type: type || 'task',
       created_by,
-      created_by_name,
+      created_by_name: created_by_name || '',
       family_id: family_id || null,
       repeat_mode: repeat_mode || 'none'
     }));
@@ -106,12 +92,7 @@ module.exports = async (req, res) => {
         const dateFormatted = new Date(date_str + 'T12:00:00').toLocaleDateString('fr-BE', {
           weekday: 'long', day: 'numeric', month: 'long'
         });
-        const repeatLabels = {
-          weekly: ' (chaque semaine)',
-          biweekly: ' (tous les 15 jours)',
-          monthly: ' (chaque mois)',
-          none: ''
-        };
+        const repeatLabels = { weekly: ' (chaque semaine)', biweekly: ' (tous les 15 jours)', monthly: ' (chaque mois)', none: '' };
         const repeatText = repeatLabels[repeat_mode] || '';
 
         for (const member of members) {
@@ -122,19 +103,17 @@ module.exports = async (req, res) => {
               sender: { name: 'Agenda Famille', email: EMAIL_ADMIN },
               to: [{ email: member.email, name: member.name }],
               subject: '📅 Nouvel événement : ' + title,
-              htmlContent: `
-                <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px">
-                  <h2 style="color:#F59E0B">📅 Agenda Famille</h2>
-                  <p>Bonjour ${member.name},</p>
-                  <p><strong>${created_by_name}</strong> a ajouté un événement${repeatText} :</p>
-                  <div style="background:#FEF3C7;border-left:4px solid #F59E0B;padding:12px 16px;border-radius:8px;margin:16px 0">
-                    <div style="font-size:18px;font-weight:bold;color:#92400E">${title}</div>
-                    <div style="color:#B45309;margin-top:4px">📆 À partir du ${dateFormatted}${time_str ? ' à ' + time_str : ''}</div>
-                    ${description ? `<div style="color:#78350F;margin-top:4px">📝 ${description}</div>` : ''}
-                  </div>
-                  <p style="color:#9CA3AF;font-size:11px">Créé par Emmanuel Acabo</p>
+              htmlContent: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px">
+                <h2 style="color:#F59E0B">📅 Agenda Famille</h2>
+                <p>Bonjour ${member.name},</p>
+                <p><strong>${created_by_name}</strong> a ajouté un événement${repeatText} :</p>
+                <div style="background:#FEF3C7;border-left:4px solid #F59E0B;padding:12px 16px;border-radius:8px;margin:16px 0">
+                  <div style="font-size:18px;font-weight:bold;color:#92400E">${title}</div>
+                  <div style="color:#B45309;margin-top:4px">📆 À partir du ${dateFormatted}${time_str ? ' à ' + time_str : ''}</div>
+                  ${description ? `<div style="color:#78350F;margin-top:4px">📝 ${description}</div>` : ''}
                 </div>
-              `
+                <p style="color:#9CA3AF;font-size:11px">Créé par Emmanuel Acabo</p>
+              </div>`
             })
           }).catch(() => {});
         }
