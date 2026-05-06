@@ -128,7 +128,6 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .badge-pending{display:inline-block;background:#FEF3C7;color:#B45309;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;margin-left:4px;}
 .journal-card{box-shadow:0 4px 12px rgba(0,0,0,0.05);transition:transform 0.1s;border-radius:16px;}
 .journal-card:active{transform:scale(0.98);}
-/* Vocal overlay */
 .vocal-overlay{display:none;position:fixed;inset:0;background:rgba(109,40,217,0.95);z-index:400;flex-direction:column;align-items:center;justify-content:center;gap:24px;}
 .vocal-overlay.show{display:flex;}
 .vocal-circle{width:120px;height:120px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;font-size:48px;animation:vocalPulse 1s infinite;}
@@ -313,6 +312,11 @@ const FERMETURES=new Set();
 for(let d=24;d<=31;d++){if(d===28)continue;const dow=new Date(2026,6,d).getDay();if(dow===0||dow===6)continue;FERMETURES.add('2026-07-'+String(d).padStart(2,'0'));}
 FERMETURES.add('2026-11-02');
 
+function getDisplayName(ev){
+  if(ev.created_by===currentUser.email) return 'vous';
+  return ev.created_by_name || 'votre partenaire';
+}
+
 function formatSmartDate(dateStr){const d=new Date(dateStr+'T12:00:00');const today=new Date();const tomorrow=new Date();tomorrow.setDate(today.getDate()+1);if(d.toDateString()===today.toDateString())return"Aujourd'hui";if(d.toDateString()===tomorrow.toDateString())return"Demain";return d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});}
 function isoWeek(date){const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));const day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);const y=new Date(Date.UTC(d.getUTCFullYear(),0,1));return Math.ceil((((d-y)/86400000)+1)/7);}
 function getWorkType(ds){const date=new Date(ds+'T12:00:00');const dow=date.getDay();if(FERMETURES.has(ds))return'fermeture';if(FERIES.has(ds))return'ferie';if(dow===0||dow===6)return'we';return isoWeek(date)%2===0?'matin':'aprem';}
@@ -325,100 +329,39 @@ function showSuccess(msg){const el=document.getElementById('alertSuccess');el.te
 
 // ─── VOCAL ────────────────────────────────────────────────────────────────
 let recognition=null;
-
 function startVoice(){
-  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){
-    alert('La reconnaissance vocale n\'est pas supportée sur ce navigateur. Utilisez Chrome ou Safari.');
-    return;
-  }
-  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-  recognition=new SpeechRecognition();
-  recognition.lang='fr-FR';
-  recognition.continuous=false;
-  recognition.interimResults=true;
-
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){alert('Reconnaissance vocale non supportée. Utilisez Chrome ou Safari.');return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR();recognition.lang='fr-FR';recognition.continuous=false;recognition.interimResults=true;
   document.getElementById('vocalOverlay').classList.add('show');
   document.getElementById('fabMic').classList.add('listening');
   document.getElementById('vocalTranscript').textContent='';
-
   recognition.onresult=(e)=>{
     const transcript=Array.from(e.results).map(r=>r[0].transcript).join('');
     document.getElementById('vocalTranscript').textContent='"'+transcript+'"';
-    if(e.results[0].isFinal){
-      stopVoice();
-      parseVoiceCommand(transcript);
-    }
+    if(e.results[0].isFinal){stopVoice();parseVoiceCommand(transcript);}
   };
-
-  recognition.onerror=()=>{stopVoice();};
-  recognition.onend=()=>{stopVoice();};
+  recognition.onerror=()=>stopVoice();
+  recognition.onend=()=>stopVoice();
   recognition.start();
 }
-
-function stopVoice(){
-  if(recognition){recognition.stop();recognition=null;}
-  document.getElementById('vocalOverlay').classList.remove('show');
-  document.getElementById('fabMic').classList.remove('listening');
-}
-
+function stopVoice(){if(recognition){recognition.stop();recognition=null;}document.getElementById('vocalOverlay').classList.remove('show');document.getElementById('fabMic').classList.remove('listening');}
 function parseVoiceCommand(text){
-  // Nettoyer le texte
   const t=text.toLowerCase().trim();
-
-  // Extraire le titre (ce qui vient avant "le" ou "pour")
-  let title=t;
-  let date_str=toDS(new Date());
-  let time_str='';
-  let type='task';
-
-  // Détecter le type
+  let title=t,date_str=toDS(new Date()),time_str='',type='task';
   if(t.includes('rendez-vous')||t.includes('rendez vous')||t.includes('rdv')){type='rdv';title=title.replace(/rendez-vous|rendez vous|rdv/gi,'').trim();}
   else if(t.includes('médecin')||t.includes('docteur')){type='rdv';}
-  else if(t.includes('sortie')||t.includes('loisir')||t.includes('cinéma')||t.includes('restaurant')){type='fun';}
+  else if(t.includes('sortie')||t.includes('cinéma')||t.includes('restaurant')){type='fun';}
   else if(t.includes('important')||t.includes('urgent')){type='important';}
   else if(t.includes('famille')||t.includes('anniversaire')){type='family';}
-
-  // Extraire l'heure : "à 14h", "à 9h30", "à 14h30"
   const heureMatch=t.match(/à\s*(\d{1,2})h(\d{2})?/);
-  if(heureMatch){
-    const h=String(heureMatch[1]).padStart(2,'0');
-    const m=heureMatch[2]||'00';
-    time_str=h+':'+m;
-    title=title.replace(heureMatch[0],'').trim();
-  }
-
-  // Extraire la date : "le 15 juillet", "le 3 mars", "demain", "aujourd'hui"
-  if(t.includes("aujourd'hui")||t.includes('aujourd hui')){
-    date_str=toDS(new Date());
-    title=title.replace(/aujourd'?hui/gi,'').trim();
-  } else if(t.includes('demain')){
-    const d=new Date();d.setDate(d.getDate()+1);date_str=toDS(d);
-    title=title.replace('demain','').trim();
-  } else {
-    const dateMatch=t.match(/le\s+(\d{1,2})\s+(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)(\s+\d{4})?/);
-    if(dateMatch){
-      const day=parseInt(dateMatch[1]);
-      const monthIdx=MONTHS_SHORT.indexOf(dateMatch[2]);
-      const year=dateMatch[3]?parseInt(dateMatch[3].trim()):new Date().getFullYear();
-      if(monthIdx>=0){
-        date_str=year+'-'+String(monthIdx+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
-      }
-      title=title.replace(dateMatch[0],'').trim();
-    }
-  }
-
-  // Nettoyer le titre
-  title=title
-    .replace(/ajoute(-moi)?|crée(-moi)?|mets(-moi)?|note|rappel|rappelle-moi/gi,'')
-    .replace(/un|une|mon|ma|le|la|les|des|pour/gi,' ')
-    .replace(/\s+/g,' ')
-    .trim();
-
-  // Capitaliser
+  if(heureMatch){time_str=String(heureMatch[1]).padStart(2,'0')+':'+(heureMatch[2]||'00');title=title.replace(heureMatch[0],'').trim();}
+  if(t.includes("aujourd'hui")||t.includes('aujourd hui')){date_str=toDS(new Date());title=title.replace(/aujourd'?hui/gi,'').trim();}
+  else if(t.includes('demain')){const d=new Date();d.setDate(d.getDate()+1);date_str=toDS(d);title=title.replace('demain','').trim();}
+  else{const dm=t.match(/le\s+(\d{1,2})\s+(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)(\s+\d{4})?/);if(dm){const day=parseInt(dm[1]);const mi=MONTHS_SHORT.indexOf(dm[2]);const yr=dm[3]?parseInt(dm[3].trim()):new Date().getFullYear();if(mi>=0){date_str=yr+'-'+String(mi+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');}title=title.replace(dm[0],'').trim();}}
+  title=title.replace(/ajoute(-moi)?|crée(-moi)?|mets(-moi)?|note|rappel|rappelle-moi/gi,'').replace(/\bun\b|\bune\b|\bmon\b|\bma\b|\ble\b|\bla\b|\bles\b|\bdes\b|\bpour\b/gi,' ').replace(/\s+/g,' ').trim();
   if(title)title=title.charAt(0).toUpperCase()+title.slice(1);
   if(!title)title='Nouvel événement';
-
-  // Ouvrir le modal pré-rempli
   openAddModal();
   document.getElementById('evTitle').value=title;
   document.getElementById('evDate').value=date_str;
@@ -429,17 +372,9 @@ function parseVoiceCommand(text){
 // ─── AUTH ─────────────────────────────────────────────────────────────────
 window.onload=()=>{
   const params=new URLSearchParams(window.location.search);
-  const token=params.get('token');
-  const email=params.get('email');
-  if(token&&email){
-    document.getElementById('loginForm').style.display='none';
-    document.getElementById('registerForm').style.display='none';
-    document.getElementById('setPassForm').style.display='block';
-    document.getElementById('authSub').textContent='Définissez votre mot de passe';
-  } else {
-    const saved=sessionStorage.getItem('agendaUser');
-    if(saved){currentUser=JSON.parse(saved);showApp();}
-  }
+  const token=params.get('token');const email=params.get('email');
+  if(token&&email){document.getElementById('loginForm').style.display='none';document.getElementById('registerForm').style.display='none';document.getElementById('setPassForm').style.display='block';document.getElementById('authSub').textContent='Définissez votre mot de passe';}
+  else{const saved=sessionStorage.getItem('agendaUser');if(saved){currentUser=JSON.parse(saved);showApp();}}
 };
 
 async function doSetPassword(){
@@ -494,7 +429,6 @@ function showApp(){
   loadEvents();
 }
 
-// ─── INVITE ───────────────────────────────────────────────────────────────
 function openInviteModal(){document.getElementById('inviteModalOverlay').classList.add('show');}
 function closeInviteModal(e){if(!e||e.target===document.getElementById('inviteModalOverlay'))document.getElementById('inviteModalOverlay').classList.remove('show');}
 async function doInvite(){
@@ -502,29 +436,30 @@ async function doInvite(){
   const invite_name=document.getElementById('inviteName').value.trim();
   if(!invite_email)return alert('Email obligatoire');
   try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'invite',family_id:currentUser.family_id,invite_email,invite_name})});
-  if(res.ok){alert('Invitation envoyée !');closeInviteModal();}
-  else{const d=await res.json();alert(d.error);}}
+  if(res.ok){alert('Invitation envoyée !');closeInviteModal();}else{const d=await res.json();alert(d.error);}}
   catch(e){alert('Erreur');}
 }
 
-// ─── ADMIN ────────────────────────────────────────────────────────────────
 async function loadPendingCount(){try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pending_list'})});const data=await res.json();const badge=document.getElementById('pendingBadge');if(data.length>0){badge.textContent=data.length;badge.style.display='inline';}else{badge.style.display='none';}}catch(e){}}
-async function openAdmin(){document.getElementById('adminOverlay').classList.add('show');const list=document.getElementById('adminList');list.innerHTML='<div style="text-align:center;color:#9CA3AF;padding:16px;">Chargement...</div>';try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pending_list'})});const data=await res.json();list.innerHTML='';if(!data.length){list.innerHTML='<div class="admin-empty">✅ Aucune demande en attente</div>';return;}data.forEach(user=>{const card=document.createElement('div');card.className='admin-card';card.innerHTML='<div class="admin-card-name">'+user.name+'</div><div class="admin-card-email">'+user.email+'</div><div class="admin-card-actions"><button class="btn-approve" onclick="approveUser(\''+user.id+'\',this)">✅ Approuver</button><button class="btn-reject" onclick="rejectUser(\''+user.id+'\',this)">❌ Refuser</button></div>';list.appendChild(card);});}catch(e){list.innerHTML='<div class="admin-empty">Erreur de chargement</div>';}}
+async function openAdmin(){document.getElementById('adminOverlay').classList.add('show');const list=document.getElementById('adminList');list.innerHTML='<div style="text-align:center;color:#9CA3AF;padding:16px;">Chargement...</div>';try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pending_list'})});const data=await res.json();list.innerHTML='';if(!data.length){list.innerHTML='<div class="admin-empty">✅ Aucune demande en attente</div>';return;}data.forEach(user=>{const card=document.createElement('div');card.className='admin-card';card.innerHTML='<div class="admin-card-name">'+user.name+'</div><div class="admin-card-email">'+user.email+'</div><div class="admin-card-actions"><button class="btn-approve" onclick="approveUser(\''+user.id+'\',this)">✅ Approuver</button><button class="btn-reject" onclick="rejectUser(\''+user.id+'\',this)">❌ Refuser</button></div>';list.appendChild(card);});}catch(e){list.innerHTML='<div class="admin-empty">Erreur</div>';}}
 async function approveUser(id,btn){btn.textContent='...';await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'approve',user_id:id})});btn.closest('.admin-card').remove();loadPendingCount();}
 async function rejectUser(id,btn){btn.textContent='...';await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'reject',user_id:id})});btn.closest('.admin-card').remove();loadPendingCount();}
 function closeAdmin(e){if(!e||e.target===document.getElementById('adminOverlay'))document.getElementById('adminOverlay').classList.remove('show');}
 
-// ─── EVENTS ───────────────────────────────────────────────────────────────
 async function loadEvents(){try{const res=await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list',family_id:currentUser.family_id})});events=await res.json();}catch(e){events=[];}renderAll();}
 function getEventsForDay(ds){return events.filter(e=>e.date_str===ds);}
-function setView(view){curView=view;document.getElementById('tabMonth').className='vtab'+(view==='month'?' active':'');document.getElementById('tabWeek').className='vtab'+(view==='week'?' active':'');document.getElementById('tabJournal').className='vtab'+(view==='journal'?' active':'');const isJournal=(view==='journal');document.querySelector('.month-nav').style.display=isJournal?'none':'flex';document.querySelector('.legend').style.display=isJournal?'none':'flex';document.getElementById('monthView').style.display=view==='month'?'block':'none';document.getElementById('monthEventsSection').style.display=view==='month'?'block':'none';document.getElementById('weekView').style.display=view==='week'?'block':'none';document.getElementById('journalView').style.display=view==='journal'?'block':'none';renderAll();}
+
+function setView(view){curView=view;document.getElementById('tabMonth').className='vtab'+(view==='month'?' active':'');document.getElementById('tabWeek').className='vtab'+(view==='week'?' active':'');document.getElementById('tabJournal').className='vtab'+(view==='journal'?' active':'');const isJ=(view==='journal');document.querySelector('.month-nav').style.display=isJ?'none':'flex';document.querySelector('.legend').style.display=isJ?'none':'flex';document.getElementById('monthView').style.display=view==='month'?'block':'none';document.getElementById('monthEventsSection').style.display=view==='month'?'block':'none';document.getElementById('weekView').style.display=view==='week'?'block':'none';document.getElementById('journalView').style.display=view==='journal'?'block':'none';renderAll();}
 function changeMonth(dir){if(curView==='month'){curMonth+=dir;if(curMonth<0){curMonth=11;curYear--;}if(curMonth>11){curMonth=0;curYear++;}}else{curWeekStart=new Date(curWeekStart);curWeekStart.setDate(curWeekStart.getDate()+dir*7);}renderAll();}
-function renderAll(){if(curView==='month'){document.getElementById('monthLabel').textContent=MONTHS[curMonth]+' '+curYear;renderMonth();renderMonthEvents();} else if(curView==='week'){const end=new Date(curWeekStart);end.setDate(end.getDate()+6);document.getElementById('monthLabel').textContent=curWeekStart.getDate()+' → '+end.getDate()+' '+MONTHS[end.getMonth()];renderWeek();} else if(curView==='journal'){renderJournal();}}
+function renderAll(){if(curView==='month'){document.getElementById('monthLabel').textContent=MONTHS[curMonth]+' '+curYear;renderMonth();renderMonthEvents();}else if(curView==='week'){const end=new Date(curWeekStart);end.setDate(end.getDate()+6);document.getElementById('monthLabel').textContent=curWeekStart.getDate()+' → '+end.getDate()+' '+MONTHS[end.getMonth()];renderWeek();}else if(curView==='journal'){renderJournal();}}
+
 function renderMonth(){const grid=document.getElementById('calGrid');grid.innerHTML='';const today=toDS(new Date());const firstDay=new Date(curYear,curMonth,1).getDay()||7;const dim=new Date(curYear,curMonth+1,0).getDate();for(let i=firstDay-1;i>0;i--){const d=document.createElement('div');d.className='cal-day empty';grid.appendChild(d);}for(let d=1;d<=dim;d++){const ds=curYear+'-'+String(curMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');const evs=getEventsForDay(ds);const wtype=getWorkType(ds);const wb=getWorkBadge(wtype);const borderMap={matin:'#BFDBFE',aprem:'#FDE68A',ferie:'#FECACA',fermeture:'#A7F3D0',we:'#F3F4F6'};const cell=document.createElement('div');cell.className='cal-day'+(ds===today?' today':'');cell.style.borderColor=borderMap[wtype]||'#F3F4F6';cell.style.borderWidth='2px';cell.style.borderStyle='solid';cell.onclick=()=>openDayModal(ds,d);const top=document.createElement('div');top.className='day-top';const num=document.createElement('div');num.className='day-num';num.textContent=d;top.appendChild(num);if(wb.lbl){const badge=document.createElement('div');badge.className='day-work '+wb.cls;badge.textContent=wb.lbl;top.appendChild(badge);}cell.appendChild(top);evs.slice(0,2).forEach(ev=>{const p=document.createElement('div');p.className='event-item';p.textContent=(TYPE_ICONS[ev.type]||'📅')+' '+ev.title;cell.appendChild(p);});grid.appendChild(cell);}}
+
 function renderMonthEvents(){const section=document.getElementById('monthEventsSection');section.innerHTML='';const dim=new Date(curYear,curMonth+1,0).getDate();const feries=[],evsList=[];for(let d=1;d<=dim;d++){const ds=curYear+'-'+String(curMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');const wtype=getWorkType(ds);const date=new Date(ds+'T12:00:00');const dayName=DAYS[date.getDay()===0?6:date.getDay()-1];if(wtype==='ferie')feries.push({ds,d,name:FERIE_NAMES[ds]||'Férié',dayName});getEventsForDay(ds).forEach(ev=>evsList.push({...ev,d,dayName,wtype}));}if(feries.length){const title=document.createElement('div');title.className='month-events-title';title.textContent='🔴 Jours fériés du mois';section.appendChild(title);feries.forEach(f=>{const row=document.createElement('div');row.className='ferie-row';row.innerHTML='<div class="ferie-date">'+f.dayName.substring(0,3)+' '+f.d+'</div><div class="ferie-name">'+f.name+'</div>';section.appendChild(row);});}if(evsList.length){const title2=document.createElement('div');title2.className='month-events-title';title2.style.marginTop='14px';title2.textContent='📅 Événements famille du mois';section.appendChild(title2);evsList.forEach(ev=>{const wb=getWorkBadge(ev.wtype);const row=document.createElement('div');row.className='month-event-row';row.innerHTML='<div class="mer-date">'+ev.dayName.substring(0,3)+' '+ev.d+'</div><div class="mer-info"><div class="mer-title">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'+(ev.time_str?'<div class="mer-sub">⏰ '+ev.time_str+'</div>':'')+(ev.description?'<div class="mer-sub">'+ev.description+'</div>':'')+(wb.lbl?'<span class="mer-work '+wb.cls+'">'+wb.lbl+'</span>':'')+'</div>';const actions=document.createElement('div');actions.style.cssText='display:flex;flex-direction:column;gap:4px;';const btnEdit=document.createElement('button');btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.onclick=(e)=>{e.stopPropagation();openEditModal(ev.id);};const btnDel=document.createElement('button');btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.onclick=(e)=>{e.stopPropagation();deleteEvent(ev.id);};actions.appendChild(btnEdit);actions.appendChild(btnDel);row.appendChild(actions);section.appendChild(row);});}}
+
 function renderWeek(){const container=document.getElementById('weekDays');container.innerHTML='';const today=toDS(new Date());for(let i=0;i<7;i++){const date=new Date(curWeekStart);date.setDate(date.getDate()+i);const ds=toDS(date);const evs=getEventsForDay(ds);const wtype=getWorkType(ds);const wb=getWeekBadge(wtype);const dayEl=document.createElement('div');dayEl.className='week-day'+(ds===today?' today-week':'');const hdr=document.createElement('div');hdr.className='week-day-header';hdr.innerHTML='<div style="display:flex;align-items:center;gap:8px;"><span class="week-day-name">'+DAYS[i]+'</span><span class="week-day-date">'+date.getDate()+' '+MONTHS[date.getMonth()].substring(0,3)+'</span></div><span class="week-day-badge '+wb.cls+'">'+wb.lbl+'</span>';dayEl.appendChild(hdr);if(!evs.length){const e=document.createElement('div');e.className='no-events';e.textContent='Aucun événement';dayEl.appendChild(e);}else{evs.forEach(ev=>{const el=document.createElement('div');el.className='week-event';el.innerHTML='<span class="week-event-time">'+(ev.time_str||'--:--')+'</span><div style="flex:1"><div style="font-size:13px;font-weight:700;">'+(TYPE_ICONS[ev.type]||'📅')+' '+ev.title+'</div>'+(ev.description?'<div style="font-size:11px;color:#9CA3AF">'+ev.description+'</div>':'')+'</div>';const btnEdit=document.createElement('button');btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.onclick=()=>openEditModal(ev.id);const btnDel=document.createElement('button');btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.onclick=()=>deleteEvent(ev.id);el.appendChild(btnEdit);el.appendChild(btnDel);dayEl.appendChild(el);});}container.appendChild(dayEl);}}
 
-function renderJournal(){const container=document.getElementById('journalView');if(!container)return;container.innerHTML='<div class="month-events-title">🔔 Derniers ajouts dans l\'agenda</div>';const sorted=[...events].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));if(!sorted.length){container.innerHTML+='<div class="no-events">Aucune activité récente</div>';return;}sorted.slice(0,15).forEach(ev=>{const row=document.createElement('div');row.className='month-event-row journal-card';const eventDateDisplay=formatSmartDate(ev.date_str);const addedBy=ev.created_by===currentUser.email?'Moi':(ev.created_by_name||'Partenaire');const repeatLabel={weekly:'🔁 Chaque semaine',biweekly:'🔁 Tous les 15j',monthly:'🔁 Chaque mois'}[ev.repeat_mode]||'';row.innerHTML=`<div class="mer-info"><div class="mer-title">${TYPE_ICONS[ev.type]||'📅'} ${ev.title}</div><div class="mer-sub">Prévu : <strong>${eventDateDisplay}</strong>${ev.time_str?' à '+ev.time_str:''}</div>${repeatLabel?'<div class="mer-sub" style="color:#8B5CF6">'+repeatLabel+'</div>':''}<div class="mer-sub" style="font-size:10px;color:var(--primary)">Ajouté par ${addedBy}</div></div>`;const actions=document.createElement('div');actions.style.cssText='display:flex;flex-direction:column;gap:6px;margin-left:10px;';const btnEdit=document.createElement('button');btnEdit.className='btn-edit-event';btnEdit.innerHTML='✏️';btnEdit.onclick=()=>openEditModal(ev.id);const btnDel=document.createElement('button');btnDel.className='btn-delete-event';btnDel.innerHTML='✕';btnDel.onclick=()=>deleteEvent(ev.id);actions.appendChild(btnEdit);actions.appendChild(btnDel);row.appendChild(actions);const createdDate=new Date(ev.created_at);const now=new Date();if((now-createdDate)<24*60*60*1000)row.style.borderLeftColor='var(--accent)';container.appendChild(row);});}
+function renderJournal(){const container=document.getElementById('journalView');if(!container)return;container.innerHTML='<div class="month-events-title">🔔 Derniers ajouts dans l\'agenda</div>';const sorted=[...events].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));if(!sorted.length){container.innerHTML+='<div class="no-events">Aucune activité récente</div>';return;}sorted.slice(0,15).forEach(ev=>{const row=document.createElement('div');row.className='month-event-row journal-card';const eventDateDisplay=formatSmartDate(ev.date_str);const addedBy=ev.created_by===currentUser.email?'Moi':(ev.created_by_name||'Partenaire');const repeatLabel={weekly:'🔁 Chaque semaine',biweekly:'🔁 Tous les 15j',monthly:'🔁 Chaque mois'}[ev.repeat_mode]||'';row.innerHTML=`<div class="mer-info"><div class="mer-title">${TYPE_ICONS[ev.type]||'📅'} ${ev.title}</div><div class="mer-sub">Prévu : <strong>${eventDateDisplay}</strong>${ev.time_str?' à '+ev.time_str:''}</div>${repeatLabel?'<div class="mer-sub" style="color:#8B5CF6">'+repeatLabel+'</div>':''}<div class="mer-sub" style="font-size:10px;color:var(--primary)">Ajouté par ${addedBy}</div></div>`;const actions=document.createElement('div');actions.style.cssText='display:flex;flex-direction:column;gap:6px;margin-left:10px;';const btnEdit=document.createElement('button');btnEdit.className='btn-edit-event';btnEdit.innerHTML='✏️';btnEdit.onclick=()=>openEditModal(ev.id);const btnDel=document.createElement('button');btnDel.className='btn-delete-event';btnDel.innerHTML='✕';btnDel.onclick=()=>deleteEvent(ev.id);actions.appendChild(btnEdit);actions.appendChild(btnDel);row.appendChild(actions);const createdDate=new Date(ev.created_at);if((new Date()-createdDate)<24*60*60*1000)row.style.borderLeftColor='var(--accent)';container.appendChild(row);});}
 
 function openAddModal(ds){editingEventId=null;document.getElementById('modalTitle').textContent='✏️ Nouvel événement';document.getElementById('evTitle').value='';document.getElementById('evDesc').value='';document.getElementById('evDate').value=ds||toDS(new Date());document.getElementById('evTime').value='';document.getElementById('evType').value='task';document.getElementById('evRepeat').value='none';document.getElementById('modalOverlay').classList.add('show');}
 function openEditModal(id){const ev=events.find(e=>e.id===id);if(!ev)return;editingEventId=id;document.getElementById('modalTitle').textContent='✏️ Modifier l\'événement';document.getElementById('evTitle').value=ev.title||'';document.getElementById('evDesc').value=ev.description||'';document.getElementById('evDate').value=ev.date_str||'';document.getElementById('evTime').value=ev.time_str||'';document.getElementById('evType').value=ev.type||'task';document.getElementById('evRepeat').value='none';document.getElementById('modalOverlay').classList.add('show');document.getElementById('dayModalOverlay').classList.remove('show');}
@@ -542,7 +477,7 @@ async function saveEvent(){
 
 async function deleteEvent(id){if(!confirm('Supprimer ?'))return;await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id})});loadEvents();}
 
-function openDayModal(ds,d){selectedDay=ds;const date=new Date(ds+'T12:00:00');const wtype=getWorkType(ds);const wb=getWeekBadge(wtype);document.getElementById('dayModalTitle').textContent=DAYS[date.getDay()===0?6:date.getDay()-1]+' '+d+' '+MONTHS[date.getMonth()];const badge=document.getElementById('dayModalBadge');badge.textContent=wb.lbl;badge.className='day-modal-badge '+wb.cls;const evs=getEventsForDay(ds);const list=document.getElementById('dayEventsList');list.innerHTML='';evs.forEach(ev=>{const addedBy=ev.created_by===currentUser.email?'vous':(ev.created_by_name||'votre partenaire');const el=document.createElement('div');el.className='day-event-item';el.innerHTML='<div style="font-size:24px">'+(TYPE_ICONS[ev.type]||'📅')+'</div><div class="day-event-info"><div class="day-event-title">'+ev.title+'</div>'+(ev.time_str?'<div class="day-event-time">⏰ '+ev.time_str+'</div>':'')+'<div class="day-event-by">Ajouté par '+addedBy+'</div></div>';const actions=document.createElement('div');actions.className='day-event-actions';const btnEdit=document.createElement('button');btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.onclick=()=>openEditModal(ev.id);const btnDel=document.createElement('button');btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.onclick=()=>deleteEvent(ev.id);actions.appendChild(btnEdit);actions.appendChild(btnDel);el.appendChild(actions);list.appendChild(el);});document.getElementById('dayModalOverlay').classList.add('show');}
+function openDayModal(ds,d){selectedDay=ds;const date=new Date(ds+'T12:00:00');const wtype=getWorkType(ds);const wb=getWeekBadge(wtype);document.getElementById('dayModalTitle').textContent=DAYS[date.getDay()===0?6:date.getDay()-1]+' '+d+' '+MONTHS[date.getMonth()];const badge=document.getElementById('dayModalBadge');badge.textContent=wb.lbl;badge.className='day-modal-badge '+wb.cls;const evs=getEventsForDay(ds);const list=document.getElementById('dayEventsList');list.innerHTML='';if(!evs.length){list.innerHTML='<div style="text-align:center;color:#9CA3AF;font-size:13px;padding:16px">Aucun événement ce jour</div>';}else{evs.forEach(ev=>{const el=document.createElement('div');el.className='day-event-item';el.innerHTML='<div style="font-size:24px">'+(TYPE_ICONS[ev.type]||'📅')+'</div><div class="day-event-info"><div class="day-event-title">'+ev.title+'</div>'+(ev.time_str?'<div class="day-event-time">⏰ '+ev.time_str+'</div>':'')+'<div class="day-event-by">Ajouté par '+getDisplayName(ev)+'</div></div>';const actions=document.createElement('div');actions.className='day-event-actions';const btnEdit=document.createElement('button');btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.onclick=()=>openEditModal(ev.id);const btnDel=document.createElement('button');btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.onclick=()=>deleteEvent(ev.id);actions.appendChild(btnEdit);actions.appendChild(btnDel);el.appendChild(actions);list.appendChild(el);});}document.getElementById('dayModalOverlay').classList.add('show');}
 function closeDayModal(e){if(!e||e.target===document.getElementById('dayModalOverlay'))document.getElementById('dayModalOverlay').classList.remove('show');}
 function addEventForDay(){closeDayModal();openAddModal(selectedDay);}
 </script>
