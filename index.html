@@ -153,12 +153,10 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .vocal-text{color:white;font-size:16px;font-weight:800;text-align:center;max-width:300px;}
 .vocal-transcript{color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;text-align:center;max-width:300px;min-height:40px;}
 .vocal-cancel{background:rgba(255,255,255,0.2);border:none;color:white;padding:12px 24px;border-radius:12px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
-/* Météo */
 .meteo-bar{display:flex;align-items:center;gap:8px;padding:8px 16px;background:linear-gradient(135deg,#EFF6FF,#F0FDF4);border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text);cursor:pointer;transition:opacity 0.2s;}
 .meteo-bar:active{opacity:0.8;}
 [data-theme="dark"] .meteo-bar{background:linear-gradient(135deg,#1e3a5f,#14532d);}
 .meteo-bar span{color:var(--muted);font-weight:600;}
-/* Modal météo semaine */
 .meteo-week-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card2);border-radius:12px;}
 .meteo-week-item.today{border:2px solid var(--primary);}
 </style>
@@ -218,13 +216,11 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
     </div>
   </div>
 
-  <!-- Météo cliquable -->
   <div class="meteo-bar" id="meteoBar" onclick="openMeteoModal()">
     <span>🌤️ Chargement météo...</span>
-    <span style="margin-left:auto;font-size:10px;">Voir la semaine →</span>
+    <span style="margin-left:auto;font-size:11px;color:var(--primary);font-weight:800;background:var(--card2);padding:4px 10px;border-radius:8px;">📅 Semaine</span>
   </div>
 
-  <!-- Barre de recherche -->
   <div class="search-bar">
     <input class="search-input" id="searchInput" placeholder="🔍 Rechercher un événement..." oninput="doSearch(this.value)">
   </div>
@@ -381,22 +377,24 @@ function buildColorPicker(){const picker=document.getElementById('colorPicker');
 // ─── MÉTÉO ────────────────────────────────────────────────────────────────
 async function loadMeteo(){
   try{
-    const res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=50.85&longitude=4.35&current=temperature_2m,weathercode,windspeed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max&timezone=Europe/Brussels&models=best_match');
+    const res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=50.85&longitude=4.35&current=temperature_2m,weathercode,windspeed_10m&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max,windspeed_10m_max&hourly=temperature_2m,weathercode&timezone=Europe/Brussels&models=best_match');
     const data=await res.json();
     const temp=Math.round(data.current.temperature_2m);
     const wind=Math.round(data.current.windspeed_10m);
     const icon=METEO_ICONS[data.current.weathercode]||'🌤️';
     const date=new Date().toLocaleDateString('fr-BE',{weekday:'long',day:'numeric',month:'long'});
-    document.getElementById('meteoBar').innerHTML=`${icon} <strong>${temp}°C</strong> 💨 ${wind} km/h <span>${date}</span><span style="margin-left:auto;font-size:10px;color:var(--primary);font-weight:800;">Voir la semaine →</span>`;
+    document.getElementById('meteoBar').innerHTML=`${icon} <strong>${temp}°C</strong> 💨 ${wind} km/h <span>${date}</span><span style="margin-left:auto;font-size:11px;color:var(--primary);font-weight:800;background:var(--card2);padding:4px 10px;border-radius:8px;">📅 Semaine</span>`;
     window.meteoWeekData=data.daily;
+    window.meteoHourlyData=data.hourly;
   }catch(e){
-    document.getElementById('meteoBar').innerHTML='🌤️ <span>Météo indisponible — cliquez pour réessayer</span>';
+    document.getElementById('meteoBar').innerHTML='🌤️ <span>Météo indisponible</span><span style="margin-left:auto;font-size:11px;color:var(--primary);font-weight:800;background:var(--card2);padding:4px 10px;border-radius:8px;">📅 Semaine</span>';
   }
 }
 
 function openMeteoModal(){
   if(!window.meteoWeekData){loadMeteo();return;}
   const daily=window.meteoWeekData;
+  const hourly=window.meteoHourlyData;
   const content=document.getElementById('meteoWeekContent');
   content.innerHTML='';
   const todayStr=toDS(new Date());
@@ -404,12 +402,21 @@ function openMeteoModal(){
     const d=new Date(dateStr+'T12:00:00');
     const jour=JOURS[d.getDay()];
     const dateLabel=d.toLocaleDateString('fr-BE',{day:'numeric',month:'short'});
-    const icon=METEO_ICONS[daily.weathercode[i]]||'🌤️';
+    const iconDay=METEO_ICONS[daily.weathercode[i]]||'🌤️';
     const tmax=Math.round(daily.temperature_2m_max[i]);
     const tmin=Math.round(daily.temperature_2m_min[i]);
     const rain=daily.precipitation_probability_max[i]||0;
-    const wind=Math.round(daily.windspeed_10m_max[i]);
     const isToday=dateStr===todayStr;
+
+    // Matin 9h et après-midi 15h
+    let matinIcon='',matinTemp='',apremIcon='',apremTemp='';
+    if(hourly){
+      const idx9=hourly.time.findIndex(t=>t===dateStr+'T09:00');
+      const idx15=hourly.time.findIndex(t=>t===dateStr+'T15:00');
+      if(idx9>=0){matinIcon=METEO_ICONS[hourly.weathercode[idx9]]||'🌤️';matinTemp=Math.round(hourly.temperature_2m[idx9])+'°';}
+      if(idx15>=0){apremIcon=METEO_ICONS[hourly.weathercode[idx15]]||'🌤️';apremTemp=Math.round(hourly.temperature_2m[idx15])+'°';}
+    }
+
     const row=document.createElement('div');
     row.className='meteo-week-item'+(isToday?' today':'');
     row.innerHTML=`
@@ -417,10 +424,13 @@ function openMeteoModal(){
         ${isToday?`<span style="color:var(--primary)">Auj.</span>`:`<span>${jour}</span>`}
         <br><span style="font-size:10px;color:var(--muted);font-weight:600;">${dateLabel}</span>
       </div>
-      <div style="font-size:28px;">${icon}</div>
+      <div style="font-size:26px;">${iconDay}</div>
       <div style="flex:1;">
-        <div style="font-weight:800;font-size:14px;">🌡️ ${tmax}° <span style="color:var(--muted);font-size:12px;">/ ${tmin}°</span></div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">💧 ${rain}% pluie · 💨 ${wind} km/h</div>
+        <div style="font-weight:800;font-size:14px;">🌡️ ${tmax}° <span style="color:var(--muted);font-size:12px;">/ ${tmin}°</span> · 💧${rain}%</div>
+        <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;">
+          ${matinIcon?`<span style="font-size:11px;background:#DBEAFE;color:#1D4ED8;padding:2px 8px;border-radius:6px;font-weight:700;">🌅 ${matinIcon} ${matinTemp}</span>`:''}
+          ${apremIcon?`<span style="font-size:11px;background:#FEF3C7;color:#B45309;padding:2px 8px;border-radius:6px;font-weight:700;">🌆 ${apremIcon} ${apremTemp}</span>`:''}
+        </div>
       </div>
     `;
     content.appendChild(row);
@@ -439,7 +449,17 @@ function stopVoice(){if(recognition){recognition.stop();recognition=null;}docume
 function parseVoiceCommand(text){const t=text.toLowerCase().trim();let title=t,date_str=toDS(new Date()),time_str='',type='task';if(t.includes('rendez-vous')||t.includes('rdv')){type='rdv';title=title.replace(/rendez-vous|rdv/gi,'').trim();}else if(t.includes('anniversaire')){type='birthday';}else if(t.includes('médecin')||t.includes('docteur')){type='rdv';}else if(t.includes('sortie')||t.includes('cinéma')||t.includes('restaurant')){type='fun';}else if(t.includes('important')||t.includes('urgent')){type='important';}else if(t.includes('famille')){type='family';}const hm=t.match(/à\s*(\d{1,2})h(\d{2})?/);if(hm){time_str=String(hm[1]).padStart(2,'0')+':'+(hm[2]||'00');title=title.replace(hm[0],'').trim();}if(t.includes("aujourd'hui")){date_str=toDS(new Date());title=title.replace(/aujourd'?hui/gi,'').trim();}else if(t.includes('demain')){const d=new Date();d.setDate(d.getDate()+1);date_str=toDS(d);title=title.replace('demain','').trim();}else{const dm=t.match(/le\s+(\d{1,2})\s+(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)(\s+\d{4})?/);if(dm){const mi=MONTHS_SHORT.indexOf(dm[2]);const yr=dm[3]?parseInt(dm[3].trim()):new Date().getFullYear();if(mi>=0)date_str=yr+'-'+String(mi+1).padStart(2,'0')+'-'+String(parseInt(dm[1])).padStart(2,'0');title=title.replace(dm[0],'').trim();}}title=title.replace(/ajoute(-moi)?|crée(-moi)?|mets(-moi)?|note|rappel|rappelle-moi/gi,'').replace(/\bun\b|\bune\b|\bmon\b|\bma\b|\ble\b|\bla\b|\bles\b|\bdes\b|\bpour\b/gi,' ').replace(/\s+/g,' ').trim();if(title)title=title.charAt(0).toUpperCase()+title.slice(1);if(!title)title='Nouvel événement';openAddModal();document.getElementById('evTitle').value=title;document.getElementById('evDate').value=date_str;document.getElementById('evTime').value=time_str;document.getElementById('evType').value=type;}
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────
-window.onload=()=>{initTheme();buildColorPicker();const params=new URLSearchParams(window.location.search);const token=params.get('token');const email=params.get('email');if(token&&email){document.getElementById('loginForm').style.display='none';document.getElementById('registerForm').style.display='none';document.getElementById('setPassForm').style.display='block';document.getElementById('authSub').textContent='Définissez votre mot de passe';}else{const saved=sessionStorage.getItem('agendaUser');if(saved){currentUser=JSON.parse(saved);showApp();}}};
+window.onload=()=>{
+  initTheme();buildColorPicker();
+  const params=new URLSearchParams(window.location.search);
+  const token=params.get('token');const email=params.get('email');
+  if(token&&email){document.getElementById('loginForm').style.display='none';document.getElementById('registerForm').style.display='none';document.getElementById('setPassForm').style.display='block';document.getElementById('authSub').textContent='Définissez votre mot de passe';}
+  else{const saved=sessionStorage.getItem('agendaUser');if(saved){currentUser=JSON.parse(saved);showApp();}}
+  // Enter sur email et mot de passe
+  document.getElementById('loginEmail').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+  document.getElementById('loginPassword').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+};
+
 async function doSetPassword(){const params=new URLSearchParams(window.location.search);const token=params.get('token');const email=params.get('email');const password=document.getElementById('setPassPassword').value;const name=document.getElementById('setPassName').value;if(!password||!name)return showError('Veuillez remplir tous les champs');try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'set_password',token,email,password,name})});const data=await res.json();if(!res.ok)return showError(data.error);showSuccess('Compte activé !');setTimeout(()=>{window.location.href=window.location.pathname;},2000);}catch(e){showError('Erreur réseau');}}
 function showRegister(){document.getElementById('loginForm').style.display='none';document.getElementById('registerForm').style.display='block';document.getElementById('authSub').textContent='Créez votre agenda famille';}
 function showLogin(){document.getElementById('loginForm').style.display='block';document.getElementById('registerForm').style.display='none';document.getElementById('setPassForm').style.display='none';}
