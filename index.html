@@ -83,7 +83,30 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .day-num{font-size:11px;font-weight:800;}
 .day-work{font-size:7px;font-weight:800;padding:1px 3px;border-radius:3px;}
 .dw-matin{background:#DBEAFE;color:#1D4ED8;}.dw-aprem{background:#FEF3C7;color:#B45309;}.dw-ferie{background:#FEE2E2;color:#B91C1C;}.dw-fermeture{background:#D1FAE5;color:#065F46;}.dw-we{background:#F3F4F6;color:#9CA3AF;}
-.event-item{font-size:7px;font-weight:700;border-radius:3px;padding:1px 3px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.event-item{
+  font-size:7px;
+  font-weight:700;
+  border-radius:3px;
+  padding:1px 3px;
+  margin-top:1px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.day-count{
+  position:absolute;
+  bottom:4px;
+  left:4px;
+  background:var(--primary);
+  color:white;
+  font-size:9px;
+  font-weight:800;
+  padding:2px 5px;
+  border-radius:999px;
+  min-width:16px;
+  text-align:center;
+}
 .month-events-section{padding:0 16px 16px;}
 .month-events-title{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
 .month-event-row{background:var(--card);border-radius:12px;padding:10px 14px;margin-bottom:8px;border-left:4px solid var(--primary);display:flex;align-items:flex-start;gap:10px;}
