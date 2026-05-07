@@ -155,7 +155,7 @@ module.exports = async (req, res) => {
 
   // ─── LISTE EN ATTENTE ────────────────────────────────────────────────────
   if (action === 'pending_list') {
-    const { data } = await supabase.from('agenda_users').select('id, name, email, family_id, created_at, status').eq('status', 'pending').order('created_at');
+    const { data } = await supabase.from('agenda_users').select('id, name, email, status').eq('status', 'pending');
     return res.json(data || []);
   }
 
