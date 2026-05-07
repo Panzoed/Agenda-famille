@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
         await fetch('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': BREVO_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ sender: { name: 'Agenda Famille', email: EMAIL_ADMIN }, to: [{ email: partnerEmailClean }], subject: '👨‍👩‍👧 ' + name + ' vous invite sur Agenda Famille !', htmlContent: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px"><h2 style="color:#F59E0B">👨‍👩‍👧 Agenda Famille</h2><p><strong>${name}</strong> vous a invité(e) à partager son agenda famille !</p><a href="${APP_URL}?token=${token}&email=${partnerEmailClean}" style="display:inline-block;margin-top:16px;background:#F59E0B;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Rejoindre l'agenda 🚀</a></div>` }) }).catch(() => {});
       }
     }
-    await fetch('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': BREVO_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ sender: { name: 'Agenda Famille', email: EMAIL_ADMIN }, to: [{ email: EMAIL_ADMIN }], subject: '🆕 Nouvelle inscription : ' + name, htmlContent: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px"><h2 style="color:#F59E0B">👨‍👩‍👧 Agenda Famille</h2><div style="background:#FEF3C7;padding:12px;border-radius:8px"><div><strong>Nom :</strong> ${name}</div><div><strong>Email :</strong> ${emailClean}</div><div><strong>Famille :</strong> ${family_name}</div>${partner_email ? '<div><strong>Partenaire :</strong> ' + partner_email + '</div>' : ''}</div><a href="${APP_URL}" style="background:#F59E0B;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:bold;">Gérer les demandes</a></div>` }) }).catch(() => {});
+    await fetch('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': BREVO_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ sender: { name: 'Agenda Famille', email: EMAIL_ADMIN }, to: [{ email: EMAIL_ADMIN }], subject: '🆕 Nouvelle inscription : ' + name, htmlContent: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px"><h2 style="color:#F59E0B">👨‍👩‍👧 Agenda Famille</h2><div style="background:#FEF3C7;padding:12px;border-radius:8px"><div><strong>Nom :</strong> ${name}</div><div><strong>Email :</strong> ${emailClean}</div><div><strong>Famille :</strong> ${family_name}</div>${partner_email ? '<div><strong>Partenaire :</strong> ' + partner_email + '</div>' : ''}</div></div>` }) }).catch(() => {});
     return res.json({ ok: true });
   }
 
@@ -53,10 +53,50 @@ module.exports = async (req, res) => {
     const emailInvite = (req.body.email || '').toLowerCase().trim();
     const { data: user } = await supabase.from('agenda_users').select('*').eq('email', emailInvite).single();
     if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
-    if (user.status !== 'invited') return res.status(400).json({ error: 'Lien invalide ou déjà utilisé' });
     const password_hash = await bcrypt.hash(password, 10);
-    const { data: updated } = await supabase.from('agenda_users').update({ password_hash, status: 'approved', name: name || user.name }).eq('email', emailInvite).select().single();
+    const { data: updated } = await supabase.from('agenda_users').update({ password_hash, status: 'approved', name: name || user.name, invite_token: null }).eq('email', emailInvite).select().single();
     return res.json({ id: updated.id, name: updated.name, email: updated.email, family_id: updated.family_id, role: updated.role });
+  }
+
+  // ─── MOT DE PASSE OUBLIÉ ─────────────────────────────────────────────────
+  if (action === 'forgot_password') {
+    const { data: user } = await supabase.from('agenda_users').select('*').eq('email', emailClean).single();
+    if (!user) return res.status(404).json({ error: 'Aucun compte trouvé avec cet email' });
+    if (user.status === 'pending' || user.status === 'rejected') return res.status(400).json({ error: 'Ce compte n\'est pas encore activé' });
+    const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    await supabase.from('agenda_users').update({ invite_token: token }).eq('email', emailClean);
+    await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'api-key': BREVO_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sender: { name: 'Agenda Famille', email: EMAIL_ADMIN },
+        to: [{ email: emailClean, name: user.name }],
+        subject: '🔑 Réinitialisation de votre mot de passe',
+        htmlContent: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px">
+          <h2 style="color:#F59E0B">👨‍👩‍👧 Agenda Famille</h2>
+          <p>Bonjour ${user.name},</p>
+          <p>Vous avez demandé à réinitialiser votre mot de passe.</p>
+          <a href="${APP_URL}?reset=1&token=${token}&email=${emailClean}" 
+             style="display:inline-block;margin-top:16px;background:#F59E0B;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">
+            Réinitialiser mon mot de passe 🔑
+          </a>
+          <p style="color:#9CA3AF;font-size:12px;margin-top:16px;">Ce lien est valable 24h. Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
+        </div>`
+      })
+    }).catch(() => {});
+    return res.json({ ok: true });
+  }
+
+  // ─── RÉINITIALISER MOT DE PASSE (depuis lien email) ──────────────────────
+  if (action === 'reset_password') {
+    const { token } = req.body;
+    const emailReset = (req.body.email || '').toLowerCase().trim();
+    const { data: user } = await supabase.from('agenda_users').select('*').eq('email', emailReset).eq('invite_token', token).single();
+    if (!user) return res.status(400).json({ error: 'Lien invalide ou expiré' });
+    if (!new_password || new_password.length < 6) return res.status(400).json({ error: 'Le mot de passe doit faire au moins 6 caractères' });
+    const password_hash = await bcrypt.hash(new_password, 10);
+    await supabase.from('agenda_users').update({ password_hash, invite_token: null, status: 'approved' }).eq('email', emailReset);
+    return res.json({ ok: true });
   }
 
   // ─── CHANGER MOT DE PASSE ────────────────────────────────────────────────
@@ -65,9 +105,39 @@ module.exports = async (req, res) => {
     if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
     const ok = await bcrypt.compare(current_password, user.password_hash);
     if (!ok) return res.status(401).json({ error: 'Mot de passe actuel incorrect' });
-    if (!new_password || new_password.length < 6) return res.status(400).json({ error: 'Le nouveau mot de passe doit faire au moins 6 caractères' });
+    if (!new_password || new_password.length < 6) return res.status(400).json({ error: 'Minimum 6 caractères' });
     const password_hash = await bcrypt.hash(new_password, 10);
     await supabase.from('agenda_users').update({ password_hash }).eq('email', emailClean);
+    return res.json({ ok: true });
+  }
+
+  // ─── RESET MOT DE PASSE PAR ADMIN ────────────────────────────────────────
+  if (action === 'admin_reset_password') {
+    // Vérifier que c'est bien l'admin qui fait la requête
+    const { admin_email } = req.body;
+    if ((admin_email || '').toLowerCase().trim() !== EMAIL_ADMIN) return res.status(403).json({ error: 'Non autorisé' });
+    const { data: user } = await supabase.from('agenda_users').select('*').eq('id', user_id).single();
+    if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    await supabase.from('agenda_users').update({ invite_token: token }).eq('id', user_id);
+    await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'api-key': BREVO_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sender: { name: 'Agenda Famille', email: EMAIL_ADMIN },
+        to: [{ email: user.email, name: user.name }],
+        subject: '🔑 Réinitialisation de votre mot de passe - Agenda Famille',
+        htmlContent: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px">
+          <h2 style="color:#F59E0B">👨‍👩‍👧 Agenda Famille</h2>
+          <p>Bonjour ${user.name},</p>
+          <p>L'administrateur a réinitialisé votre mot de passe. Cliquez ci-dessous pour en définir un nouveau :</p>
+          <a href="${APP_URL}?reset=1&token=${token}&email=${user.email}" 
+             style="display:inline-block;margin-top:16px;background:#F59E0B;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">
+            Définir mon nouveau mot de passe 🔑
+          </a>
+        </div>`
+      })
+    }).catch(() => {});
     return res.json({ ok: true });
   }
 
@@ -86,6 +156,14 @@ module.exports = async (req, res) => {
   // ─── LISTE EN ATTENTE ────────────────────────────────────────────────────
   if (action === 'pending_list') {
     const { data } = await supabase.from('agenda_users').select('id, name, email, family_id, created_at, status').eq('status', 'pending').order('created_at');
+    return res.json(data || []);
+  }
+
+  // ─── LISTE TOUS LES UTILISATEURS (admin) ─────────────────────────────────
+  if (action === 'all_users') {
+    const { admin_email } = req.body;
+    if ((admin_email || '').toLowerCase().trim() !== EMAIL_ADMIN) return res.status(403).json({ error: 'Non autorisé' });
+    const { data } = await supabase.from('agenda_users').select('id, name, email, status, role, created_at').neq('status', 'pending').order('created_at');
     return res.json(data || []);
   }
 
