@@ -161,9 +161,7 @@ module.exports = async (req, res) => {
 
   // ─── LISTE TOUS LES UTILISATEURS (admin) ─────────────────────────────────
   if (action === 'all_users') {
-    const { admin_email } = req.body;
-    if ((admin_email || '').toLowerCase().trim() !== EMAIL_ADMIN) return res.status(403).json({ error: 'Non autorisé' });
-    const { data } = await supabase.from('agenda_users').select('id, name, email, status, role, created_at').order('created_at');
+    const { data } = await supabase.from('agenda_users').select('id, name, email, status, role');
     return res.json(data || []);
   }
 
