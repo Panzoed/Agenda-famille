@@ -30,8 +30,8 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .auth-feature-icon{font-size:22px;}
 .form-group{margin-bottom:14px;}
 .form-group label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
-.form-group input{width:100%;background:var(--card2);border:2px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none;transition:border 0.2s;}
-.form-group input:focus{border-color:var(--primary);}
+.form-group input,.form-group select{width:100%;background:var(--card2);border:2px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none;transition:border 0.2s;}
+.form-group input:focus,.form-group select:focus{border-color:var(--primary);}
 .btn-login{width:100%;padding:14px;background:linear-gradient(135deg,var(--primary),var(--primary2));border:none;border-radius:12px;color:white;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;margin-top:4px;}
 .alert{padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;display:none;font-weight:600;}
 .alert-error{background:#FEF2F2;border:2px solid #FCA5A5;color:#DC2626;}
@@ -42,23 +42,21 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .toggle-auth a{color:var(--primary);font-weight:700;cursor:pointer;}
 .forgot-link{text-align:right;margin-top:-8px;margin-bottom:10px;font-size:12px;}
 .forgot-link a{color:var(--muted);font-weight:600;cursor:pointer;}
-.forgot-link a:hover{color:var(--primary);}
 .app-wrap{display:none;padding:0 0 80px;}
 .topbar{background:var(--card);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 10px var(--shadow);position:sticky;top:0;z-index:50;}
 .topbar-left{display:flex;align-items:center;gap:10px;}
 .topbar-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:white;flex-shrink:0;}
 .topbar-name{font-size:14px;font-weight:800;}
 .topbar-sub{font-size:11px;color:var(--muted);}
-.btn-hamburger{background:var(--card2);border:2px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:10px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;}
-.hamburger-menu{display:none;position:absolute;top:50px;right:16px;background:var(--card);border-radius:16px;box-shadow:0 8px 32px var(--shadow);border:2px solid var(--border);padding:8px;z-index:100;min-width:180px;flex-direction:column;gap:4px;}
+.btn-hamburger{background:var(--card2);border:2px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:10px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.hamburger-menu{display:none;position:absolute;top:60px;right:16px;background:var(--card);border-radius:16px;box-shadow:0 8px 32px var(--shadow);border:2px solid var(--border);padding:8px;z-index:100;min-width:190px;flex-direction:column;gap:4px;}
 .hamburger-menu.open{display:flex;}
 .hmenu-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--text);font-family:'Nunito',sans-serif;width:100%;text-align:left;}
 .hmenu-item:hover{background:var(--card2);}
 .hmenu-item.danger{color:#EF4444;}
 .hmenu-item.admin-item{color:#3B82F6;}
 .hmenu-divider{height:1px;background:var(--border);margin:4px 0;}
-.meteo-bar{display:flex;align-items:center;gap:8px;padding:8px 16px;background:linear-gradient(135deg,#EFF6FF,#F0FDF4);border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text);cursor:pointer;transition:opacity 0.2s;}
-.meteo-bar:active{opacity:0.8;}
+.meteo-bar{display:flex;align-items:center;gap:8px;padding:8px 16px;background:linear-gradient(135deg,#EFF6FF,#F0FDF4);border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text);cursor:pointer;}
 [data-theme="dark"] .meteo-bar{background:linear-gradient(135deg,#1e3a5f,#14532d);}
 .meteo-bar span{color:var(--muted);font-weight:600;}
 .today-banner{background:linear-gradient(135deg,var(--primary),var(--accent));padding:12px 16px;}
@@ -89,7 +87,13 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .day-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
 .day-num{font-size:12px;font-weight:800;}
 .day-work{font-size:7px;font-weight:800;padding:1px 3px;border-radius:3px;}
-.dw-matin{background:#DBEAFE;color:#1D4ED8;}.dw-aprem{background:#FEF3C7;color:#B45309;}.dw-ferie{background:#FEE2E2;color:#B91C1C;}.dw-fermeture{background:#D1FAE5;color:#065F46;}.dw-we{background:#F3F4F6;color:#9CA3AF;}
+.dw-matin{background:#DBEAFE;color:#1D4ED8;}
+.dw-aprem{background:#FEF3C7;color:#B45309;}
+.dw-nuit{background:#EDE9FE;color:#5B21B6;}
+.dw-ferie{background:#FEE2E2;color:#B91C1C;}
+.dw-fermeture{background:#D1FAE5;color:#065F46;}
+.dw-we{background:#F3F4F6;color:#9CA3AF;}
+.dw-extra{background:#FCE7F3;color:#BE185D;}
 .event-item{font-size:8px;font-weight:700;border-radius:4px;padding:2px 4px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ev-count-badge{position:absolute;bottom:4px;right:4px;background:var(--primary);color:white;font-size:9px;font-weight:900;padding:2px 6px;border-radius:6px;min-width:18px;text-align:center;}
 .month-events-section{padding:0 16px 16px;}
@@ -106,7 +110,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .week-day-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
 .week-day-name{font-size:13px;font-weight:800;}.week-day-date{font-size:11px;color:var(--muted);font-weight:600;}
 .week-day-badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;}
-.wdb-matin{background:#DBEAFE;color:#1D4ED8;}.wdb-aprem{background:#FEF3C7;color:#B45309;}.wdb-ferie{background:#FEE2E2;color:#B91C1C;}.wdb-fermeture{background:#D1FAE5;color:#065F46;}.wdb-we{background:#F3F4F6;color:#9CA3AF;}
+.wdb-matin{background:#DBEAFE;color:#1D4ED8;}.wdb-aprem{background:#FEF3C7;color:#B45309;}.wdb-nuit{background:#EDE9FE;color:#5B21B6;}.wdb-ferie{background:#FEE2E2;color:#B91C1C;}.wdb-fermeture{background:#D1FAE5;color:#065F46;}.wdb-we{background:#F3F4F6;color:#9CA3AF;}.wdb-extra{background:#FCE7F3;color:#BE185D;}
 .week-day.today-week{border:2px solid #0891B2;}
 .week-event{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--card2);border-radius:10px;margin-bottom:6px;border-left:3px solid var(--primary);}
 .week-event.done-ev{opacity:0.5;}
@@ -168,7 +172,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .vocal-overlay{display:none;position:fixed;inset:0;background:rgba(109,40,217,0.95);z-index:400;flex-direction:column;align-items:center;justify-content:center;gap:24px;}
 .vocal-overlay.show{display:flex;}
 .vocal-circle{width:120px;height:120px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;font-size:48px;animation:vocalPulse 1s infinite;}
-@keyframes vocalPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,255,255,0.4);}50%{transform:scale(1.05);box-shadow:0 0 0 20px rgba(255,255,255,0);}}
+@keyframes vocalPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
 .vocal-text{color:white;font-size:16px;font-weight:800;text-align:center;max-width:300px;}
 .vocal-transcript{color:rgba(255,255,255,0.8);font-size:14px;font-weight:600;text-align:center;max-width:300px;min-height:40px;}
 .vocal-cancel{background:rgba(255,255,255,0.2);border:none;color:white;padding:12px 24px;border-radius:12px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
@@ -178,6 +182,16 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .city-suggestion-item{padding:10px 14px;cursor:pointer;font-size:14px;font-weight:600;border-bottom:1px solid var(--border);}
 .city-suggestion-item:last-child{border-bottom:none;}
 .city-suggestion-item:hover{background:var(--card2);}
+/* Planning */
+.planning-section{background:var(--card2);border-radius:16px;padding:16px;margin-bottom:16px;}
+.planning-section-title{font-size:13px;font-weight:800;margin-bottom:12px;color:var(--text);}
+.planning-mode-btns{display:flex;gap:8px;margin-bottom:14px;}
+.planning-mode-btn{flex:1;padding:10px;border-radius:10px;border:2px solid var(--border);background:var(--card);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);text-align:center;}
+.planning-mode-btn.active{background:var(--primary);border-color:var(--primary);color:white;}
+.day-shift-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
+.day-shift-row:last-child{border-bottom:none;}
+.day-shift-name{font-size:13px;font-weight:700;min-width:90px;}
+.day-shift-select{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:6px 10px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;color:var(--text);outline:none;}
 </style>
 </head>
 <body>
@@ -200,8 +214,6 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
     </div>
     <div class="alert alert-error" id="alertError"></div>
     <div class="alert alert-success" id="alertSuccess"></div>
-
-    <!-- Login -->
     <div id="loginForm">
       <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="votre@email.com"></div>
       <div class="form-group"><label>Mot de passe</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
@@ -209,8 +221,6 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
       <button class="btn-login" onclick="doLogin()">Se connecter 🚀</button>
       <div class="toggle-auth">Pas encore de compte ? <a onclick="showRegister()">S'inscrire</a></div>
     </div>
-
-    <!-- Register -->
     <div id="registerForm" style="display:none">
       <div class="form-group"><label>Votre prénom</label><input type="text" id="regName" placeholder="Ex: Marie"></div>
       <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="votre@email.com"></div>
@@ -220,24 +230,17 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
       <button class="btn-login" onclick="doRegister()">Envoyer la demande 📨</button>
       <div class="toggle-auth">Déjà un compte ? <a onclick="showLogin()">Se connecter</a></div>
     </div>
-
-    <!-- Mot de passe oublié -->
     <div id="forgotForm" style="display:none">
-      <div style="text-align:center;margin-bottom:16px;font-size:13px;color:var(--muted);font-weight:600;">Entrez votre email et vous recevrez un lien pour réinitialiser votre mot de passe.</div>
+      <div style="text-align:center;margin-bottom:16px;font-size:13px;color:var(--muted);font-weight:600;">Entrez votre email pour recevoir un lien de réinitialisation.</div>
       <div class="form-group"><label>Email</label><input type="email" id="forgotEmail" placeholder="votre@email.com"></div>
       <button class="btn-login" onclick="doForgotPassword()">Envoyer le lien 📧</button>
       <div class="toggle-auth"><a onclick="showLogin()">← Retour à la connexion</a></div>
     </div>
-
-    <!-- Reset mot de passe (depuis lien email) -->
     <div id="resetPassForm" style="display:none">
-      <div style="text-align:center;margin-bottom:16px;font-size:13px;color:var(--muted);font-weight:600;">Définissez votre nouveau mot de passe.</div>
       <div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="resetPassword" placeholder="••••••••"></div>
       <div class="form-group"><label>Confirmer</label><input type="password" id="resetPasswordConfirm" placeholder="••••••••"></div>
-      <button class="btn-login" onclick="doResetPassword()">Enregistrer le nouveau mot de passe 🔑</button>
+      <button class="btn-login" onclick="doResetPassword()">Enregistrer 🔑</button>
     </div>
-
-    <!-- Set password (invitation) -->
     <div id="setPassForm" style="display:none">
       <div class="form-group"><label>Votre prénom</label><input type="text" id="setPassName" placeholder="Ex: Laetitia"></div>
       <div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="setPassPassword" placeholder="••••••••"></div>
@@ -298,9 +301,10 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
   <div class="legend" id="legendBar">
     <div class="leg"><div class="leg-dot" style="background:#3B82F6"></div>Matin</div>
     <div class="leg"><div class="leg-dot" style="background:#F59E0B"></div>Après-midi</div>
+    <div class="leg"><div class="leg-dot" style="background:#7C3AED"></div>Nuit</div>
     <div class="leg"><div class="leg-dot" style="background:#DC2626"></div>Férié</div>
     <div class="leg"><div class="leg-dot" style="background:#16A34A"></div>Fermeture</div>
-    <div class="leg"><div class="leg-dot" style="background:#EC4899"></div>Événement</div>
+    <div class="leg"><div class="leg-dot" style="background:#EC4899"></div>Extra</div>
   </div>
   <div class="month-view" id="monthView">
     <div class="cal-headers">
@@ -320,8 +324,10 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 
 <!-- Modal Paramètres -->
 <div class="modal-overlay" id="settingsOverlay" onclick="closeSettings(event)">
-  <div class="modal" style="max-height:85vh;overflow-y:auto;">
+  <div class="modal" style="max-height:90vh;overflow-y:auto;">
     <div class="modal-title">⚙️ Paramètres</div>
+
+    <!-- Ville météo -->
     <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:10px;">🌤️ Ville météo</div>
     <div class="modal-group" style="position:relative;">
       <label>Rechercher une ville</label>
@@ -329,12 +335,52 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
       <div class="city-suggestions" id="citySuggestions" style="display:none;"></div>
     </div>
     <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:20px;">Ville actuelle : <strong id="currentCityLabel">Bruxelles</strong></div>
+
+    <!-- Planning -->
+    <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:10px;">📅 Mon planning de travail</div>
+    <div class="planning-section">
+      <div class="planning-mode-btns">
+        <button class="planning-mode-btn active" id="planModeAuto" onclick="setPlanMode('auto')">🔄 Automatique<br><small>Lun-Ven alternance</small></button>
+        <button class="planning-mode-btn" id="planModeManuel" onclick="setPlanMode('manuel')">✏️ Manuel<br><small>Je configure moi-même</small></button>
+      </div>
+
+      <!-- Mode auto -->
+      <div id="planAutoSection">
+        <div class="modal-group">
+          <label>Semaine de référence</label>
+          <select id="planRefWeek"></select>
+        </div>
+        <div class="modal-group">
+          <label>Cette semaine est</label>
+          <select id="planRefShift">
+            <option value="matin">🌅 Matin</option>
+            <option value="aprem">🌆 Après-midi</option>
+          </select>
+        </div>
+        <div style="font-size:11px;color:var(--muted);background:var(--card2);padding:10px;border-radius:8px;">
+          ℹ️ L'app alternera automatiquement Matin/Après-midi chaque semaine du lundi au vendredi.
+        </div>
+      </div>
+
+      <!-- Mode manuel -->
+      <div id="planManuelSection" style="display:none;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;font-weight:600;">Configurez le shift pour chaque jour de la semaine :</div>
+        <div id="planDayRows"></div>
+        <div class="modal-group" style="margin-top:12px;">
+          <label>🎨 Couleur jours supplémentaires</label>
+          <div class="color-picker" id="planExtraColorPicker"></div>
+          <input type="hidden" id="planExtraColor" value="#EC4899">
+        </div>
+      </div>
+    </div>
+
+    <!-- Mot de passe -->
     <div style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:10px;">🔑 Changer mon mot de passe</div>
     <div class="modal-group"><label>Mot de passe actuel</label><input type="password" id="cpCurrent" placeholder="••••••••"></div>
     <div class="modal-group"><label>Nouveau mot de passe</label><input type="password" id="cpNew" placeholder="••••••••"></div>
     <div class="modal-group"><label>Confirmer</label><input type="password" id="cpConfirm" placeholder="••••••••"></div>
     <div id="cpAlert" style="font-size:12px;font-weight:700;margin-bottom:8px;display:none;"></div>
-    <button class="btn-save" onclick="changePassword()" style="margin-top:0;">Changer le mot de passe 🔑</button>
+    <button class="btn-save" onclick="savePlanningAndSettings()">Enregistrer tout 💾</button>
     <button class="btn-cancel-modal" onclick="closeSettings()">Fermer</button>
   </div>
 </div>
@@ -437,6 +483,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 
 <script>
 const EMAIL_ADMIN='siciliano_messinese@hotmail.it';
+const MY_FAMILY_ID='00000000-0000-0000-0000-000000000001';
 const COLORS=['#EC4899','#F59E0B','#3B82F6','#16A34A','#8B5CF6','#EF4444','#06B6D4','#F97316','#84CC16','#64748B'];
 const METEO_ICONS={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'❄️',73:'❄️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
 const JOURS=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
@@ -444,10 +491,14 @@ const AVATAR_COLORS=['#F59E0B','#EC4899','#3B82F6','#16A34A','#8B5CF6','#EF4444'
 function getAvatarColor(name){return AVATAR_COLORS[(name||'A').toUpperCase().charCodeAt(0)%AVATAR_COLORS.length];}
 let currentUser=null,events=[],curYear=new Date().getFullYear(),curMonth=new Date().getMonth(),curView='month',curWeekStart=null,selectedDay=null,editingEventId=null,selectedColor='#EC4899';
 let meteoLat=50.85,meteoLon=4.35,meteoCity='Bruxelles';
+let familyPlanning=null; // planning chargé depuis Supabase
+let planMode='auto',planExtraColor='#EC4899';
 const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const MONTHS_SHORT=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 const DAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+const DAYS_SHORT=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const TYPE_ICONS={task:'✅',rdv:'📍',family:'👨‍👩‍👧',fun:'🎉',important:'⚠️',birthday:'🎂'};
+// Fériés et fermetures seulement pour la famille Polypeptide
 const FERIE_NAMES={'2026-01-01':'Nouvel An','2026-04-06':'Lundi de Pâques','2026-05-01':'Fête du Travail','2026-05-14':'Ascension','2026-05-25':'Lundi de Pentecôte','2026-07-21':'Fête Nationale','2026-07-28':'Récup. 15/08','2026-08-15':'Assomption','2026-11-01':'Toussaint','2026-11-11':'Armistice','2026-12-25':'Noël','2026-12-31':'Récup. 1/11'};
 const FERIES=new Set(Object.keys(FERIE_NAMES));
 const FERMETURES=new Set();
@@ -466,12 +517,179 @@ document.addEventListener('click',function(e){const menu=document.getElementById
 // ─── VILLE ────────────────────────────────────────────────────────────────
 function initCity(){const saved=localStorage.getItem('agenda-city');if(saved){const c=JSON.parse(saved);meteoLat=c.lat;meteoLon=c.lon;meteoCity=c.name;}}
 
-// ─── PARAMÈTRES ───────────────────────────────────────────────────────────
-function openSettings(){document.getElementById('cityInput').value='';document.getElementById('citySuggestions').style.display='none';document.getElementById('currentCityLabel').textContent=meteoCity;document.getElementById('cpCurrent').value='';document.getElementById('cpNew').value='';document.getElementById('cpConfirm').value='';document.getElementById('cpAlert').style.display='none';document.getElementById('settingsOverlay').classList.add('show');}
+// ─── PLANNING ────────────────────────────────────────────────────────────
+async function loadPlanning(){
+  try{
+    const res=await fetch('/api/planning',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'get',family_id:currentUser.family_id})});
+    familyPlanning=await res.json();
+  }catch(e){familyPlanning=null;}
+}
+
+function getWorkType(ds){
+  const date=new Date(ds+'T12:00:00');
+  const dow=date.getDay(); // 0=dim, 1=lun...6=sam
+
+  // Famille Emmanuel/Laetitia = planning PPL hardcodé
+  if(currentUser&&currentUser.family_id===MY_FAMILY_ID){
+    if(FERMETURES.has(ds))return'fermeture';
+    if(FERIES.has(ds))return'ferie';
+    if(dow===0||dow===6)return'we';
+    return isoWeek(date)%2===0?'matin':'aprem';
+  }
+
+  // Autres familles = planning personnalisé
+  if(familyPlanning){
+    // Fermetures fériés belges pour tout le monde
+    if(FERIES.has(ds))return'ferie';
+
+    if(familyPlanning.mode==='auto'){
+      if(dow===0||dow===6)return'we';
+      // Calcul alternance basé sur semaine de référence
+      const refWeek=familyPlanning.ref_week||1;
+      const refYear=familyPlanning.ref_year||2026;
+      const refShift=familyPlanning.ref_shift||'matin';
+      const currentWeek=isoWeek(date);
+      const currentYear=date.getFullYear();
+      // Calculer le nombre de semaines de différence
+      const totalWeeksRef=refYear*53+refWeek;
+      const totalWeeksCur=currentYear*53+currentWeek;
+      const diff=totalWeeksCur-totalWeeksRef;
+      const isEven=diff%2===0;
+      if(refShift==='matin')return isEven?'matin':'aprem';
+      else return isEven?'aprem':'matin';
+    }
+
+    if(familyPlanning.mode==='manuel'){
+      const customDays=familyPlanning.custom_days||{};
+      // Chercher le jour de la semaine dans custom_days
+      const dayNames=['dim','lun','mar','mer','jeu','ven','sam'];
+      const dayKey=dayNames[dow];
+      const shift=customDays[dayKey];
+      if(!shift)return'we';
+      if(shift==='extra')return'extra';
+      return shift; // matin, aprem, nuit
+    }
+  }
+
+  // Par défaut si pas de planning configuré
+  if(dow===0||dow===6)return'we';
+  return'we';
+}
+
+function getWorkBadge(t){
+  const m={
+    matin:{cls:'dw-matin',lbl:'Matin'},
+    aprem:{cls:'dw-aprem',lbl:'Aprèm'},
+    nuit:{cls:'dw-nuit',lbl:'Nuit'},
+    ferie:{cls:'dw-ferie',lbl:'Férié'},
+    fermeture:{cls:'dw-fermeture',lbl:'Fermé'},
+    extra:{cls:'dw-extra',lbl:'Extra'},
+    we:{cls:'dw-we',lbl:''}
+  };
+  return m[t]||m.we;
+}
+function getWeekBadge(t){
+  const m={
+    matin:{cls:'wdb-matin',lbl:'🌅 Matin'},
+    aprem:{cls:'wdb-aprem',lbl:'🌆 Après-midi'},
+    nuit:{cls:'wdb-nuit',lbl:'🌙 Nuit'},
+    ferie:{cls:'wdb-ferie',lbl:'🔴 Férié'},
+    fermeture:{cls:'wdb-fermeture',lbl:'🏭 Fermé'},
+    extra:{cls:'wdb-extra',lbl:'⭐ Extra'},
+    we:{cls:'wdb-we',lbl:'Weekend'}
+  };
+  return m[t]||m.we;
+}
+
+// ─── PARAMÈTRES PLANNING ─────────────────────────────────────────────────
+function setPlanMode(mode){
+  planMode=mode;
+  document.getElementById('planModeAuto').className='planning-mode-btn'+(mode==='auto'?' active':'');
+  document.getElementById('planModeManuel').className='planning-mode-btn'+(mode==='manuel'?' active':'');
+  document.getElementById('planAutoSection').style.display=mode==='auto'?'block':'none';
+  document.getElementById('planManuelSection').style.display=mode==='manuel'?'block':'none';
+}
+
+function buildPlanDayRows(){
+  const container=document.getElementById('planDayRows');
+  container.innerHTML='';
+  const dayNames=['lun','mar','mer','jeu','ven','sam','dim'];
+  const dayLabels=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+  const customDays=(familyPlanning&&familyPlanning.custom_days)||{};
+  dayNames.forEach((key,i)=>{
+    const row=document.createElement('div');row.className='day-shift-row';
+    const label=document.createElement('div');label.className='day-shift-name';label.textContent=dayLabels[i];
+    const sel=document.createElement('select');sel.className='day-shift-select';sel.id='shift_'+key;
+    [['','— Repos —'],['matin','🌅 Matin'],['aprem','🌆 Après-midi'],['nuit','🌙 Nuit'],['extra','⭐ Extra']].forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;sel.appendChild(o);});
+    sel.value=customDays[key]||'';
+    row.appendChild(label);row.appendChild(sel);container.appendChild(row);
+  });
+}
+
+function buildPlanExtraColorPicker(){
+  const picker=document.getElementById('planExtraColorPicker');
+  picker.innerHTML='';
+  COLORS.forEach(c=>{const dot=document.createElement('div');dot.className='color-dot'+(c===planExtraColor?' selected':'');dot.style.background=c;dot.onclick=()=>{planExtraColor=c;document.getElementById('planExtraColor').value=c;buildPlanExtraColorPicker();};picker.appendChild(dot);});
+}
+
+function buildWeekSelect(){
+  const sel=document.getElementById('planRefWeek');sel.innerHTML='';
+  for(let w=1;w<=53;w++){const o=document.createElement('option');o.value=w;o.textContent='Semaine '+w;sel.appendChild(o);}
+  if(familyPlanning&&familyPlanning.ref_week)sel.value=familyPlanning.ref_week;
+  else sel.value=isoWeek(new Date());
+}
+
+async function openSettings(){
+  document.getElementById('cityInput').value='';
+  document.getElementById('citySuggestions').style.display='none';
+  document.getElementById('currentCityLabel').textContent=meteoCity;
+  document.getElementById('cpCurrent').value='';document.getElementById('cpNew').value='';document.getElementById('cpConfirm').value='';
+  document.getElementById('cpAlert').style.display='none';
+  // Init planning
+  buildWeekSelect();
+  if(familyPlanning){
+    planMode=familyPlanning.mode||'auto';
+    planExtraColor=familyPlanning.extra_color||'#EC4899';
+    if(familyPlanning.ref_shift)document.getElementById('planRefShift').value=familyPlanning.ref_shift;
+  }
+  setPlanMode(planMode);
+  buildPlanDayRows();
+  buildPlanExtraColorPicker();
+  document.getElementById('settingsOverlay').classList.add('show');
+}
 function closeSettings(e){if(!e||e.target===document.getElementById('settingsOverlay')){document.getElementById('settingsOverlay').classList.remove('show');document.getElementById('citySuggestions').style.display='none';}}
+
+async function savePlanningAndSettings(){
+  // Sauvegarder planning
+  const mode=planMode;
+  const ref_week=parseInt(document.getElementById('planRefWeek').value);
+  const ref_year=new Date().getFullYear();
+  const ref_shift=document.getElementById('planRefShift').value;
+  const dayNames=['lun','mar','mer','jeu','ven','sam','dim'];
+  const custom_days={};
+  dayNames.forEach(k=>{const el=document.getElementById('shift_'+k);if(el&&el.value)custom_days[k]=el.value;});
+  custom_days['_extra_color']=planExtraColor;
+  try{
+    await fetch('/api/planning',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',family_id:currentUser.family_id,mode,ref_week,ref_year,ref_shift,custom_days})});
+    familyPlanning={mode,ref_week,ref_year,ref_shift,custom_days};
+  }catch(e){}
+  // Changer mot de passe si rempli
+  const current=document.getElementById('cpCurrent').value;
+  const newPass=document.getElementById('cpNew').value;
+  const confirm=document.getElementById('cpConfirm').value;
+  const al=document.getElementById('cpAlert');
+  if(current&&newPass){
+    if(newPass!==confirm){al.style.cssText='display:block;color:#DC2626;';al.textContent='Les mots de passe ne correspondent pas';return;}
+    if(newPass.length<6){al.style.cssText='display:block;color:#DC2626;';al.textContent='Minimum 6 caractères';return;}
+    try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'change_password',email:currentUser.email,current_password:current,new_password:newPass})});const data=await res.json();if(!res.ok){al.style.cssText='display:block;color:#DC2626;';al.textContent=data.error;return;}al.style.cssText='display:block;color:#16A34A;';al.textContent='✅ Mot de passe changé !';}catch(e){}
+  }
+  renderAll();
+  closeSettings();
+  alert('✅ Paramètres sauvegardés !');
+}
+
 let citySearchTimer=null;
-async function searchCity(q){clearTimeout(citySearchTimer);const sug=document.getElementById('citySuggestions');if(!q||q.length<2){sug.style.display='none';return;}citySearchTimer=setTimeout(async()=>{try{const res=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=fr&format=json`);const data=await res.json();sug.innerHTML='';if(!data.results||!data.results.length){sug.innerHTML='<div class="city-suggestion-item" style="color:var(--muted);">Aucun résultat</div>';sug.style.display='block';return;}data.results.forEach(r=>{const item=document.createElement('div');item.className='city-suggestion-item';const flag=r.country_code==='BE'?'🇧🇪':r.country_code==='FR'?'🇫🇷':r.country_code==='LU'?'🇱🇺':r.country_code==='NL'?'🇳🇱':'🌍';item.innerHTML=`${flag} <strong>${r.name}</strong> <span style="color:var(--muted);font-size:12px;">${r.admin1||''}</span>`;item.onclick=()=>{meteoLat=r.latitude;meteoLon=r.longitude;meteoCity=r.name;localStorage.setItem('agenda-city',JSON.stringify({lat:r.latitude,lon:r.longitude,name:r.name}));document.getElementById('cityInput').value='';sug.style.display='none';document.getElementById('currentCityLabel').textContent=r.name;loadMeteo();closeSettings();};sug.appendChild(item);});sug.style.display='block';}catch(e){sug.style.display='none';}},400);}
-async function changePassword(){const current=document.getElementById('cpCurrent').value;const newPass=document.getElementById('cpNew').value;const confirm=document.getElementById('cpConfirm').value;const al=document.getElementById('cpAlert');if(!current||!newPass||!confirm){al.style.cssText='display:block;color:#DC2626;';al.textContent='Remplissez tous les champs';return;}if(newPass!==confirm){al.style.cssText='display:block;color:#DC2626;';al.textContent='Les mots de passe ne correspondent pas';return;}if(newPass.length<6){al.style.cssText='display:block;color:#DC2626;';al.textContent='Minimum 6 caractères';return;}try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'change_password',email:currentUser.email,current_password:current,new_password:newPass})});const data=await res.json();if(!res.ok){al.style.cssText='display:block;color:#DC2626;';al.textContent=data.error;return;}al.style.cssText='display:block;color:#16A34A;';al.textContent='✅ Mot de passe changé !';document.getElementById('cpCurrent').value='';document.getElementById('cpNew').value='';document.getElementById('cpConfirm').value='';setTimeout(()=>{al.style.display='none';},3000);}catch(e){al.style.cssText='display:block;color:#DC2626;';al.textContent='Erreur réseau';}}
+async function searchCity(q){clearTimeout(citySearchTimer);const sug=document.getElementById('citySuggestions');if(!q||q.length<2){sug.style.display='none';return;}citySearchTimer=setTimeout(async()=>{try{const res=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=fr&format=json`);const data=await res.json();sug.innerHTML='';if(!data.results||!data.results.length){sug.innerHTML='<div class="city-suggestion-item" style="color:var(--muted);">Aucun résultat</div>';sug.style.display='block';return;}data.results.forEach(r=>{const item=document.createElement('div');item.className='city-suggestion-item';const flag=r.country_code==='BE'?'🇧🇪':r.country_code==='FR'?'🇫🇷':r.country_code==='LU'?'🇱🇺':r.country_code==='NL'?'🇳🇱':'🌍';item.innerHTML=`${flag} <strong>${r.name}</strong> <span style="color:var(--muted);font-size:12px;">${r.admin1||''}</span>`;item.onclick=()=>{meteoLat=r.latitude;meteoLon=r.longitude;meteoCity=r.name;localStorage.setItem('agenda-city',JSON.stringify({lat:r.latitude,lon:r.longitude,name:r.name}));document.getElementById('cityInput').value='';sug.style.display='none';document.getElementById('currentCityLabel').textContent=r.name;loadMeteo();};sug.appendChild(item);});sug.style.display='block';}catch(e){sug.style.display='none';}},400);}
 
 // ─── COULEURS ─────────────────────────────────────────────────────────────
 function buildColorPicker(){const picker=document.getElementById('colorPicker');picker.innerHTML='';COLORS.forEach(c=>{const dot=document.createElement('div');dot.className='color-dot'+(c===selectedColor?' selected':'');dot.style.background=c;dot.onclick=()=>{selectedColor=c;document.getElementById('evColor').value=c;buildColorPicker();};picker.appendChild(dot);});}
@@ -483,11 +701,7 @@ function closeMeteoModal(e){if(!e||e.target===document.getElementById('meteoOver
 
 // ─── BANNIÈRE AUJOURD'HUI ────────────────────────────────────────────────
 function renderTodayBanner(){const today=toDS(new Date());const todayEvs=events.filter(e=>e.date_str===today);const banner=document.getElementById('todayBanner');const container=document.getElementById('todayEvents');if(!todayEvs.length){banner.style.display='none';return;}banner.style.display='block';container.innerHTML='';todayEvs.forEach(ev=>{const chip=document.createElement('span');chip.className='today-event-chip'+(ev.done?' done':'');chip.innerHTML=(ev.done?'✅ ':'')+( TYPE_ICONS[ev.type]||'📅')+' '+ev.title+(ev.time_str?' · '+ev.time_str:'');chip.onclick=()=>toggleDone(ev.id);container.appendChild(chip);});}
-
-// ─── PARTAGER ────────────────────────────────────────────────────────────
 function shareWhatsApp(ev){const date=new Date(ev.date_str+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});const msg=encodeURIComponent(`📅 ${ev.title}\n📆 ${date}${ev.time_str?' à '+ev.time_str:''}${ev.description?'\n📝 '+ev.description:''}\n\nVia Agenda Famille`);window.open(`https://wa.me/?text=${msg}`,'_blank');}
-
-// ─── RECHERCHE ────────────────────────────────────────────────────────────
 function doSearch(q){const results=document.getElementById('searchResults');if(!q.trim()){results.style.display='none';results.innerHTML='';return;}const found=events.filter(e=>e.title.toLowerCase().includes(q.toLowerCase())||(e.description||'').toLowerCase().includes(q.toLowerCase()));results.style.display='block';results.innerHTML='';if(!found.length){results.innerHTML='<div style="color:var(--muted);font-size:13px;padding:8px;">Aucun résultat</div>';return;}found.slice(0,8).forEach(ev=>{const row=document.createElement('div');row.className='search-result-item';row.style.borderLeftColor=ev.color||'#EC4899';const date=new Date(ev.date_str+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'});row.innerHTML=`<div style="font-size:20px">${TYPE_ICONS[ev.type]||'📅'}</div><div style="flex:1"><div style="font-size:13px;font-weight:800;">${ev.title}</div><div style="font-size:11px;color:var(--muted);">📆 ${date}${ev.time_str?' à '+ev.time_str:''}</div></div>`;row.onclick=()=>{document.getElementById('searchInput').value='';results.style.display='none';const d=new Date(ev.date_str+'T12:00:00');curYear=d.getFullYear();curMonth=d.getMonth();setView('month');};results.appendChild(row);});}
 
 // ─── VOCAL ────────────────────────────────────────────────────────────────
@@ -501,96 +715,39 @@ window.onload=()=>{
   initTheme();initCity();buildColorPicker();
   const params=new URLSearchParams(window.location.search);
   const token=params.get('token');const email=params.get('email');const reset=params.get('reset');
-  if(reset&&token&&email){
-    // Formulaire reset mot de passe
-    hideAllAuthForms();document.getElementById('resetPassForm').style.display='block';
-  } else if(token&&email&&!reset){
-    // Formulaire invitation
-    hideAllAuthForms();document.getElementById('setPassForm').style.display='block';
-  } else {
-    const saved=sessionStorage.getItem('agendaUser');if(saved){currentUser=JSON.parse(saved);showApp();}
-  }
+  if(reset&&token&&email){hideAllAuthForms();document.getElementById('resetPassForm').style.display='block';}
+  else if(token&&email&&!reset){hideAllAuthForms();document.getElementById('setPassForm').style.display='block';}
+  else{const saved=sessionStorage.getItem('agendaUser');if(saved){currentUser=JSON.parse(saved);showApp();}}
   document.getElementById('loginEmail').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
   document.getElementById('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 };
-
 function hideAllAuthForms(){['loginForm','registerForm','forgotForm','resetPassForm','setPassForm'].forEach(id=>{document.getElementById(id).style.display='none';});}
 function showLogin(){hideAllAuthForms();document.getElementById('loginForm').style.display='block';}
 function showRegister(){hideAllAuthForms();document.getElementById('registerForm').style.display='block';}
 function showForgot(){hideAllAuthForms();document.getElementById('forgotForm').style.display='block';}
-
-async function doForgotPassword(){
-  const email=document.getElementById('forgotEmail').value.trim().toLowerCase();
-  if(!email)return showError('Entrez votre email');
-  try{
-    const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'forgot_password',email})});
-    const data=await res.json();
-    if(!res.ok)return showError(data.error||'Erreur');
-    showSuccess('✅ Email envoyé ! Vérifiez votre boîte mail.');
-    setTimeout(()=>showLogin(),4000);
-  }catch(e){showError('Erreur réseau');}
-}
-
-async function doResetPassword(){
-  const params=new URLSearchParams(window.location.search);
-  const token=params.get('token');const email=params.get('email');
-  const newPass=document.getElementById('resetPassword').value;
-  const confirm=document.getElementById('resetPasswordConfirm').value;
-  if(!newPass||!confirm)return showError('Remplissez tous les champs');
-  if(newPass!==confirm)return showError('Les mots de passe ne correspondent pas');
-  if(newPass.length<6)return showError('Minimum 6 caractères');
-  try{
-    const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'reset_password',token,email,new_password:newPass})});
-    const data=await res.json();
-    if(!res.ok)return showError(data.error||'Lien invalide ou expiré');
-    showSuccess('✅ Mot de passe réinitialisé !');
-    setTimeout(()=>{window.location.href=window.location.pathname;},2000);
-  }catch(e){showError('Erreur réseau');}
-}
-
+async function doForgotPassword(){const email=document.getElementById('forgotEmail').value.trim().toLowerCase();if(!email)return showError('Entrez votre email');try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'forgot_password',email})});const data=await res.json();if(!res.ok)return showError(data.error||'Erreur');showSuccess('✅ Email envoyé !');setTimeout(()=>showLogin(),4000);}catch(e){showError('Erreur réseau');}}
+async function doResetPassword(){const params=new URLSearchParams(window.location.search);const token=params.get('token');const email=params.get('email');const newPass=document.getElementById('resetPassword').value;const confirm=document.getElementById('resetPasswordConfirm').value;if(!newPass||!confirm)return showError('Remplissez tous les champs');if(newPass!==confirm)return showError('Les mots de passe ne correspondent pas');if(newPass.length<6)return showError('Minimum 6 caractères');try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'reset_password',token,email,new_password:newPass})});const data=await res.json();if(!res.ok)return showError(data.error||'Lien invalide');showSuccess('✅ Mot de passe réinitialisé !');setTimeout(()=>{window.location.href=window.location.pathname;},2000);}catch(e){showError('Erreur réseau');}}
 async function doSetPassword(){const params=new URLSearchParams(window.location.search);const token=params.get('token');const email=params.get('email');const password=document.getElementById('setPassPassword').value;const name=document.getElementById('setPassName').value;if(!password||!name)return showError('Veuillez remplir tous les champs');try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'set_password',token,email,password,name})});const data=await res.json();if(!res.ok)return showError(data.error);showSuccess('Compte activé !');setTimeout(()=>{window.location.href=window.location.pathname;},2000);}catch(e){showError('Erreur réseau');}}
 async function doLogin(){const email=document.getElementById('loginEmail').value.trim().toLowerCase();const password=document.getElementById('loginPassword').value;if(!email||!password)return showError('Remplissez tous les champs');try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'login',email,password})});const data=await res.json();if(!res.ok)return showError(data.error||'Erreur');currentUser=data;sessionStorage.setItem('agendaUser',JSON.stringify(data));showApp();}catch(e){showError('Erreur réseau');}}
 async function doRegister(){const name=document.getElementById('regName').value.trim();const email=document.getElementById('regEmail').value.trim().toLowerCase();const password=document.getElementById('regPassword').value;const family_name=document.getElementById('regFamily').value.trim();const partner_email=document.getElementById('regPartnerEmail').value.trim();if(!name||!email||!password||!family_name)return showError('Tous les champs sont obligatoires');try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'register',name,email,password,family_name,partner_email})});const data=await res.json();if(!res.ok)return showError(data.error||'Erreur');showSuccess('✅ Demande envoyée !');setTimeout(()=>showLogin(),3000);}catch(e){showError('Erreur réseau');}}
-function doLogout(){currentUser=null;sessionStorage.removeItem('agendaUser');document.getElementById('appWrap').style.display='none';document.getElementById('authWrap').style.display='flex';showLogin();closeMenu();}
-function showApp(){curWeekStart=getMonday(new Date());document.getElementById('authWrap').style.display='none';document.getElementById('appWrap').style.display='block';document.getElementById('topName').textContent=currentUser.name;const av=document.getElementById('topAvatar');av.textContent=currentUser.name.charAt(0).toUpperCase();av.style.background=getAvatarColor(currentUser.name);if(currentUser.email===EMAIL_ADMIN){document.getElementById('menuAdmin').style.display='flex';loadPendingCount();}loadEvents();loadMeteo();setInterval(()=>loadEvents(),30000);} 
+function doLogout(){currentUser=null;familyPlanning=null;sessionStorage.removeItem('agendaUser');document.getElementById('appWrap').style.display='none';document.getElementById('authWrap').style.display='flex';showLogin();closeMenu();}
+function showApp(){curWeekStart=getMonday(new Date());document.getElementById('authWrap').style.display='none';document.getElementById('appWrap').style.display='block';document.getElementById('topName').textContent=currentUser.name;const av=document.getElementById('topAvatar');av.textContent=currentUser.name.charAt(0).toUpperCase();av.style.background=getAvatarColor(currentUser.name);if(currentUser.email===EMAIL_ADMIN){document.getElementById('menuAdmin').style.display='flex';loadPendingCount();}loadEvents();loadMeteo();loadPlanning().then(()=>renderAll());setInterval(()=>loadEvents(),30000);}
 function openInviteModal(){document.getElementById('inviteModalOverlay').classList.add('show');}
 function closeInviteModal(e){if(!e||e.target===document.getElementById('inviteModalOverlay'))document.getElementById('inviteModalOverlay').classList.remove('show');}
 async function doInvite(){const invite_email=document.getElementById('inviteEmail').value.trim();const invite_name=document.getElementById('inviteName').value.trim();if(!invite_email)return alert('Email obligatoire');try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'invite',family_id:currentUser.family_id,invite_email,invite_name})});if(res.ok){alert('Invitation envoyée !');closeInviteModal();}else{const d=await res.json();alert(d.error);}}catch(e){alert('Erreur');}}
 async function loadPendingCount(){try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pending_list'})});const data=await res.json();const badge=document.getElementById('pendingBadge');if(data.length>0){badge.textContent=data.length;badge.style.display='inline';}else badge.style.display='none';}catch(e){}}
-
-// ─── ADMIN AVEC ONGLETS ───────────────────────────────────────────────────
 let currentAdminTab='pending';
 async function openAdmin(){document.getElementById('adminOverlay').classList.add('show');showAdminTab('pending');}
-async function showAdminTab(tab){
-  currentAdminTab=tab;
-  document.getElementById('tabPending').className='admin-tab'+(tab==='pending'?' active':'');
-  document.getElementById('tabUsers').className='admin-tab'+(tab==='users'?' active':'');
-  const list=document.getElementById('adminList');
-  list.innerHTML='<div style="text-align:center;color:#9CA3AF;padding:16px;">Chargement...</div>';
-  if(tab==='pending'){
-    try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pending_list'})});const data=await res.json();list.innerHTML='';if(!data.length){list.innerHTML='<div class="admin-empty">✅ Aucune demande en attente</div>';return;}data.forEach(user=>{const card=document.createElement('div');card.className='admin-card';card.innerHTML='<div class="admin-card-name">'+user.name+'</div><div class="admin-card-email">'+user.email+'</div><div class="admin-card-actions"><button class="btn-approve" onclick="approveUser(\''+user.id+'\',this)">✅ Approuver</button><button class="btn-reject" onclick="rejectUser(\''+user.id+'\',this)">❌ Refuser</button></div>';list.appendChild(card);});}catch(e){list.innerHTML='<div class="admin-empty">Erreur</div>';}
-  } else {
-    // Onglet tous les utilisateurs avec reset mot de passe
-    try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'all_users',admin_email:currentUser.email})});const data=await res.json();list.innerHTML='';if(!data.length){list.innerHTML='<div class="admin-empty">Aucun utilisateur</div>';return;}data.forEach(user=>{const card=document.createElement('div');card.className='admin-card';const statusColor=user.status==='approved'?'#16A34A':user.status==='invited'?'#B45309':'#9CA3AF';card.innerHTML=`<div class="admin-card-name">${user.name}</div><div class="admin-card-email">${user.email}</div><div style="font-size:10px;color:${statusColor};font-weight:700;margin-top:4px;">${user.status.toUpperCase()}</div><div class="admin-card-actions"><button class="btn-reset-pw" onclick="adminResetPassword('${user.id}','${user.name}',this)">🔑 Reset mot de passe</button></div>`;list.appendChild(card);});}catch(e){list.innerHTML='<div class="admin-empty">Erreur</div>';}
-  }
-}
-async function adminResetPassword(userId,userName,btn){
-  if(!confirm(`Envoyer un email de réinitialisation à ${userName} ?`))return;
-  btn.textContent='Envoi...';btn.disabled=true;
-  try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'admin_reset_password',user_id:userId,admin_email:currentUser.email})});if(res.ok){btn.textContent='✅ Envoyé !';btn.style.background='#F0FDF4';btn.style.color='#16A34A';}else{btn.textContent='❌ Erreur';btn.disabled=false;}}catch(e){btn.textContent='❌ Erreur';btn.disabled=false;}
-}
+async function showAdminTab(tab){currentAdminTab=tab;document.getElementById('tabPending').className='admin-tab'+(tab==='pending'?' active':'');document.getElementById('tabUsers').className='admin-tab'+(tab==='users'?' active':'');const list=document.getElementById('adminList');list.innerHTML='<div style="text-align:center;color:#9CA3AF;padding:16px;">Chargement...</div>';if(tab==='pending'){try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'pending_list'})});const data=await res.json();list.innerHTML='';if(!data.length){list.innerHTML='<div class="admin-empty">✅ Aucune demande en attente</div>';return;}data.forEach(user=>{const card=document.createElement('div');card.className='admin-card';card.innerHTML='<div class="admin-card-name">'+user.name+'</div><div class="admin-card-email">'+user.email+'</div><div class="admin-card-actions"><button class="btn-approve" onclick="approveUser(\''+user.id+'\',this)">✅ Approuver</button><button class="btn-reject" onclick="rejectUser(\''+user.id+'\',this)">❌ Refuser</button></div>';list.appendChild(card);});}catch(e){list.innerHTML='<div class="admin-empty">Erreur</div>';}}else{try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'all_users',admin_email:currentUser.email})});const data=await res.json();list.innerHTML='';if(!data.length){list.innerHTML='<div class="admin-empty">Aucun utilisateur</div>';return;}data.forEach(user=>{const card=document.createElement('div');card.className='admin-card';const statusColor=user.status==='approved'?'#16A34A':user.status==='invited'?'#B45309':'#9CA3AF';card.innerHTML=`<div class="admin-card-name">${user.name}</div><div class="admin-card-email">${user.email}</div><div style="font-size:10px;color:${statusColor};font-weight:700;margin-top:4px;">${user.status.toUpperCase()}</div><div class="admin-card-actions"><button class="btn-reset-pw" onclick="adminResetPassword('${user.id}','${user.name}',this)">🔑 Reset mot de passe</button></div>`;list.appendChild(card);});}catch(e){list.innerHTML='<div class="admin-empty">Erreur</div>';}}}
+async function adminResetPassword(userId,userName,btn){if(!confirm(`Envoyer un email de réinitialisation à ${userName} ?`))return;btn.textContent='Envoi...';btn.disabled=true;try{const res=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'admin_reset_password',user_id:userId,admin_email:currentUser.email})});if(res.ok){btn.textContent='✅ Envoyé !';btn.style.background='#F0FDF4';btn.style.color='#16A34A';}else{btn.textContent='❌ Erreur';btn.disabled=false;}}catch(e){btn.textContent='❌ Erreur';btn.disabled=false;}}
 async function approveUser(id,btn){btn.textContent='...';await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'approve',user_id:id})});btn.closest('.admin-card').remove();loadPendingCount();}
 async function rejectUser(id,btn){btn.textContent='...';await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'reject',user_id:id})});btn.closest('.admin-card').remove();loadPendingCount();}
 function closeAdmin(e){if(!e||e.target===document.getElementById('adminOverlay'))document.getElementById('adminOverlay').classList.remove('show');}
-
 async function loadEvents(){try{const res=await fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'list',family_id:currentUser.family_id})});events=await res.json();}catch(e){events=[];}renderAll();renderTodayBanner();}
 function getEventsForDay(ds){return events.filter(e=>e.date_str===ds);}
 function getDisplayName(ev){if(ev.created_by===currentUser.email)return'vous';return ev.created_by_name||'votre partenaire';}
 function formatSmartDate(ds){const d=new Date(ds+'T12:00:00');const today=new Date();const tomorrow=new Date();tomorrow.setDate(today.getDate()+1);if(d.toDateString()===today.toDateString())return"Aujourd'hui";if(d.toDateString()===tomorrow.toDateString())return"Demain";return d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});}
 function isoWeek(date){const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));const day=d.getUTCDay()||7;d.setUTCDate(d.getUTCDate()+4-day);const y=new Date(Date.UTC(d.getUTCFullYear(),0,1));return Math.ceil((((d-y)/86400000)+1)/7);}
-function getWorkType(ds){const date=new Date(ds+'T12:00:00');const dow=date.getDay();if(FERMETURES.has(ds))return'fermeture';if(FERIES.has(ds))return'ferie';if(dow===0||dow===6)return'we';return isoWeek(date)%2===0?'matin':'aprem';}
-function getWorkBadge(t){const m={matin:{cls:'dw-matin',lbl:'Matin'},aprem:{cls:'dw-aprem',lbl:'Aprèm'},ferie:{cls:'dw-ferie',lbl:'Férié'},fermeture:{cls:'dw-fermeture',lbl:'Fermé'},we:{cls:'dw-we',lbl:''}};return m[t]||m.we;}
-function getWeekBadge(t){const m={matin:{cls:'wdb-matin',lbl:'🌅 Matin'},aprem:{cls:'wdb-aprem',lbl:'🌆 Après-midi'},ferie:{cls:'wdb-ferie',lbl:'🔴 Férié'},fermeture:{cls:'wdb-fermeture',lbl:'🏭 Fermé'},we:{cls:'wdb-we',lbl:'Weekend'}};return m[t]||m.we;}
 function getMonday(d){const date=new Date(d);const day=date.getDay()||7;date.setDate(date.getDate()-day+1);date.setHours(0,0,0,0);return date;}
 function toDS(date){return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');}
 function showError(msg){const el=document.getElementById('alertError');el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',4000);}
@@ -598,7 +755,7 @@ function showSuccess(msg){const el=document.getElementById('alertSuccess');el.te
 function setView(view){curView=view;document.getElementById('tabMonth').className='vtab'+(view==='month'?' active':'');document.getElementById('tabWeek').className='vtab'+(view==='week'?' active':'');document.getElementById('tabJournal').className='vtab'+(view==='journal'?' active':'');const isJ=(view==='journal');document.getElementById('monthNav').style.display=isJ?'none':'flex';document.getElementById('legendBar').style.display=isJ?'none':'flex';document.getElementById('monthView').style.display=view==='month'?'block':'none';document.getElementById('monthEventsSection').style.display=view==='month'?'block':'none';document.getElementById('weekView').style.display=view==='week'?'block':'none';document.getElementById('journalView').style.display=view==='journal'?'block':'none';renderAll();}
 function changeMonth(dir){if(curView==='month'){curMonth+=dir;if(curMonth<0){curMonth=11;curYear--;}if(curMonth>11){curMonth=0;curYear++;}}else{curWeekStart=new Date(curWeekStart);curWeekStart.setDate(curWeekStart.getDate()+dir*7);}renderAll();}
 function renderAll(){if(curView==='month'){document.getElementById('monthLabel').textContent=MONTHS[curMonth]+' '+curYear;renderMonth();renderMonthEvents();}else if(curView==='week'){const end=new Date(curWeekStart);end.setDate(end.getDate()+6);document.getElementById('monthLabel').textContent=curWeekStart.getDate()+' → '+end.getDate()+' '+MONTHS[end.getMonth()];renderWeek();}else renderJournal();}
-function renderMonth(){const grid=document.getElementById('calGrid');grid.innerHTML='';const today=toDS(new Date());const firstDay=new Date(curYear,curMonth,1).getDay()||7;const dim=new Date(curYear,curMonth+1,0).getDate();for(let i=firstDay-1;i>0;i--){const d=document.createElement('div');d.className='cal-day empty';grid.appendChild(d);}for(let d=1;d<=dim;d++){const ds=curYear+'-'+String(curMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');const evs=getEventsForDay(ds);const wtype=getWorkType(ds);const wb=getWorkBadge(wtype);const borderMap={matin:'#BFDBFE',aprem:'#FDE68A',ferie:'#FECACA',fermeture:'#A7F3D0',we:'#F3F4F6'};const cell=document.createElement('div');cell.className='cal-day'+(ds===today?' today':'');cell.style.borderColor=borderMap[wtype]||'#F3F4F6';cell.style.borderWidth='2px';cell.style.borderStyle='solid';cell.onclick=()=>openDayModal(ds,d);const top=document.createElement('div');top.className='day-top';const num=document.createElement('div');num.className='day-num';num.textContent=d;top.appendChild(num);if(wb.lbl){const badge=document.createElement('div');badge.className='day-work '+wb.cls;badge.textContent=wb.lbl;top.appendChild(badge);}cell.appendChild(top);evs.slice(0,2).forEach(ev=>{const p=document.createElement('div');p.className='event-item';p.style.cssText='background:'+(ev.color||'#EC4899')+';color:white;'+(ev.done?'opacity:0.5;text-decoration:line-through;':'');p.textContent=(ev.pinned?'📌 ':'')+( TYPE_ICONS[ev.type]||'📅')+' '+ev.title;cell.appendChild(p);});if(evs.length>0){const badge=document.createElement('div');badge.className='ev-count-badge';badge.textContent=evs.length;cell.appendChild(badge);}grid.appendChild(cell);}}
+function renderMonth(){const grid=document.getElementById('calGrid');grid.innerHTML='';const today=toDS(new Date());const firstDay=new Date(curYear,curMonth,1).getDay()||7;const dim=new Date(curYear,curMonth+1,0).getDate();for(let i=firstDay-1;i>0;i--){const d=document.createElement('div');d.className='cal-day empty';grid.appendChild(d);}for(let d=1;d<=dim;d++){const ds=curYear+'-'+String(curMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');const evs=getEventsForDay(ds);const wtype=getWorkType(ds);const wb=getWorkBadge(wtype);const borderMap={matin:'#BFDBFE',aprem:'#FDE68A',nuit:'#EDE9FE',ferie:'#FECACA',fermeture:'#A7F3D0',extra:'#FCE7F3',we:'#F3F4F6'};const cell=document.createElement('div');cell.className='cal-day'+(ds===today?' today':'');cell.style.borderColor=borderMap[wtype]||'#F3F4F6';cell.style.borderWidth='2px';cell.style.borderStyle='solid';cell.onclick=()=>openDayModal(ds,d);const top=document.createElement('div');top.className='day-top';const num=document.createElement('div');num.className='day-num';num.textContent=d;top.appendChild(num);if(wb.lbl){const badge=document.createElement('div');badge.className='day-work '+wb.cls;badge.textContent=wb.lbl;top.appendChild(badge);}cell.appendChild(top);evs.slice(0,2).forEach(ev=>{const p=document.createElement('div');p.className='event-item';p.style.cssText='background:'+(ev.color||'#EC4899')+';color:white;'+(ev.done?'opacity:0.5;text-decoration:line-through;':'');p.textContent=(ev.pinned?'📌 ':'')+( TYPE_ICONS[ev.type]||'📅')+' '+ev.title;cell.appendChild(p);});if(evs.length>0){const badge=document.createElement('div');badge.className='ev-count-badge';badge.textContent=evs.length;cell.appendChild(badge);}grid.appendChild(cell);}}
 function renderMonthEvents(){const section=document.getElementById('monthEventsSection');section.innerHTML='';const dim=new Date(curYear,curMonth+1,0).getDate();const feries=[],evsList=[];for(let d=1;d<=dim;d++){const ds=curYear+'-'+String(curMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');const wtype=getWorkType(ds);const date=new Date(ds+'T12:00:00');const dayName=DAYS[date.getDay()===0?6:date.getDay()-1];if(wtype==='ferie')feries.push({ds,d,name:FERIE_NAMES[ds]||'Férié',dayName});getEventsForDay(ds).forEach(ev=>evsList.push({...ev,d,dayName,wtype}));}evsList.sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0));if(feries.length){const title=document.createElement('div');title.className='month-events-title';title.textContent='🔴 Jours fériés du mois';section.appendChild(title);feries.forEach(f=>{const row=document.createElement('div');row.className='ferie-row';row.innerHTML='<div class="ferie-date">'+f.dayName.substring(0,3)+' '+f.d+'</div><div class="ferie-name">'+f.name+'</div>';section.appendChild(row);});}if(evsList.length){const title2=document.createElement('div');title2.className='month-events-title';title2.style.marginTop='14px';title2.textContent='📅 Événements famille du mois';section.appendChild(title2);evsList.forEach(ev=>{const wb=getWorkBadge(ev.wtype);const c=ev.color||'#EC4899';const row=document.createElement('div');row.className='month-event-row'+(ev.done?' done-row':'');row.style.borderLeftColor=c;row.innerHTML='<div class="mer-date">'+ev.dayName.substring(0,3)+' '+ev.d+'</div><div class="mer-info"><div class="mer-title">'+(ev.pinned?'📌 ':'')+(ev.done?'<s>':'')+( TYPE_ICONS[ev.type]||'📅')+' '+ev.title+(ev.done?'</s>':'')+'</div>'+(ev.time_str?'<div class="mer-sub">⏰ '+ev.time_str+'</div>':'')+(ev.description?'<div class="mer-sub">'+ev.description+'</div>':'')+(wb.lbl?'<span class="mer-work '+wb.cls+'">'+wb.lbl+'</span>':'')+'</div>';const actions=document.createElement('div');actions.style.cssText='display:flex;flex-direction:column;gap:4px;';const btnDone=document.createElement('button');btnDone.className='btn-done-event'+(ev.done?' done':'');btnDone.textContent='✓';btnDone.onclick=(e)=>{e.stopPropagation();toggleDone(ev.id);};const btnPin=document.createElement('button');btnPin.className='btn-pin-event'+(ev.pinned?' pinned':'');btnPin.textContent='📌';btnPin.onclick=(e)=>{e.stopPropagation();togglePin(ev.id);};const btnEdit=document.createElement('button');btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.onclick=(e)=>{e.stopPropagation();openEditModal(ev.id);};const btnDel=document.createElement('button');btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.onclick=(e)=>{e.stopPropagation();deleteEvent(ev.id);};const btnShare=document.createElement('button');btnShare.className='btn-share';btnShare.textContent='📤';btnShare.onclick=(e)=>{e.stopPropagation();shareWhatsApp(ev);};actions.appendChild(btnDone);actions.appendChild(btnPin);actions.appendChild(btnEdit);actions.appendChild(btnDel);actions.appendChild(btnShare);row.appendChild(actions);section.appendChild(row);});}}
 function renderWeek(){const container=document.getElementById('weekDays');container.innerHTML='';const today=toDS(new Date());for(let i=0;i<7;i++){const date=new Date(curWeekStart);date.setDate(date.getDate()+i);const ds=toDS(date);const evs=getEventsForDay(ds);const wtype=getWorkType(ds);const wb=getWeekBadge(wtype);const dayEl=document.createElement('div');dayEl.className='week-day'+(ds===today?' today-week':'');const hdr=document.createElement('div');hdr.className='week-day-header';hdr.innerHTML='<div style="display:flex;align-items:center;gap:8px;"><span class="week-day-name">'+DAYS[i]+'</span><span class="week-day-date">'+date.getDate()+' '+MONTHS[date.getMonth()].substring(0,3)+'</span></div><span class="week-day-badge '+wb.cls+'">'+wb.lbl+'</span>';dayEl.appendChild(hdr);if(!evs.length){const e=document.createElement('div');e.className='no-events';e.textContent='Aucun événement';dayEl.appendChild(e);}else{evs.forEach(ev=>{const el=document.createElement('div');el.className='week-event'+(ev.done?' done-ev':'');el.style.borderLeftColor=ev.color||'#EC4899';el.innerHTML='<span class="week-event-time">'+(ev.time_str||'--:--')+'</span><div style="flex:1"><div style="font-size:13px;font-weight:700;">'+(ev.done?'<s>':'')+( TYPE_ICONS[ev.type]||'📅')+' '+ev.title+(ev.done?'</s>':'')+'</div>'+(ev.description?'<div style="font-size:11px;color:var(--muted)">'+ev.description+'</div>':'')+'</div>';const btnDone=document.createElement('button');btnDone.className='btn-done-event'+(ev.done?' done':'');btnDone.textContent='✓';btnDone.onclick=()=>toggleDone(ev.id);const btnEdit=document.createElement('button');btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.onclick=()=>openEditModal(ev.id);const btnDel=document.createElement('button');btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.onclick=()=>deleteEvent(ev.id);el.appendChild(btnDone);el.appendChild(btnEdit);el.appendChild(btnDel);dayEl.appendChild(el);});}container.appendChild(dayEl);}}
 function renderJournal(){const container=document.getElementById('journalView');if(!container)return;container.innerHTML='<div class="month-events-title">🔔 Derniers ajouts dans l\'agenda</div>';const sorted=[...events].sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||new Date(b.created_at)-new Date(a.created_at));if(!sorted.length){container.innerHTML+='<div class="no-events">Aucune activité récente</div>';return;}sorted.slice(0,15).forEach(ev=>{const row=document.createElement('div');row.className='month-event-row journal-card'+(ev.done?' done-row':'');row.style.borderLeftColor=ev.color||'#EC4899';const eventDateDisplay=formatSmartDate(ev.date_str);const addedBy=ev.created_by===currentUser.email?'Moi':(ev.created_by_name||'Partenaire');const repeatLabel={weekly:'🔁 Chaque semaine',biweekly:'🔁 Tous les 15j',monthly:'🔁 Chaque mois'}[ev.repeat_mode]||'';row.innerHTML=`<div class="mer-info"><div class="mer-title">${ev.pinned?'📌 ':''}${ev.done?'<s>':''}${TYPE_ICONS[ev.type]||'📅'} ${ev.title}${ev.done?'</s>':''}</div><div class="mer-sub">Prévu : <strong>${eventDateDisplay}</strong>${ev.time_str?' à '+ev.time_str:''}</div>${repeatLabel?'<div class="mer-sub" style="color:#8B5CF6">'+repeatLabel+'</div>':''}<div class="mer-sub" style="font-size:10px;color:var(--primary)">Ajouté par ${addedBy}</div></div>`;const actions=document.createElement('div');actions.style.cssText='display:flex;flex-direction:column;gap:4px;margin-left:10px;';const btnDone=document.createElement('button');btnDone.className='btn-done-event'+(ev.done?' done':'');btnDone.textContent='✓';btnDone.onclick=()=>toggleDone(ev.id);const btnPin=document.createElement('button');btnPin.className='btn-pin-event'+(ev.pinned?' pinned':'');btnPin.textContent='📌';btnPin.onclick=()=>togglePin(ev.id);const btnEdit=document.createElement('button');btnEdit.className='btn-edit-event';btnEdit.textContent='✏️';btnEdit.onclick=()=>openEditModal(ev.id);const btnDel=document.createElement('button');btnDel.className='btn-delete-event';btnDel.textContent='✕';btnDel.onclick=()=>deleteEvent(ev.id);const btnShare=document.createElement('button');btnShare.className='btn-share';btnShare.textContent='📤';btnShare.onclick=()=>shareWhatsApp(ev);actions.appendChild(btnDone);actions.appendChild(btnPin);actions.appendChild(btnEdit);actions.appendChild(btnDel);actions.appendChild(btnShare);row.appendChild(actions);container.appendChild(row);});}
