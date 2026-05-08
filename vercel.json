@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/api/auth", "destination": "/api/auth" },
-    { "source": "/api/events", "destination": "/api/events" }
+    { "source": "/api/events", "destination": "/api/events" },
+    { "source": "/api/planning", "destination": "/api/planning" }
   ]
 }
