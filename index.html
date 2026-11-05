@@ -205,6 +205,13 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 .hs-row input{width:64px;padding:8px;border-radius:8px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:15px;font-weight:700;text-align:center;}
 .hs-btn{padding:9px 14px;border:none;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;background:#10B981;color:#fff;}
 .hs-btn.del{background:#EF4444;}
+.va-bar{background:linear-gradient(135deg,#EFF6FF,#DBEAFE);color:#1E3A8A;}
+[data-theme="dark"] .va-bar{background:linear-gradient(135deg,#1E3A8A,#1D4ED8);color:#DBEAFE;}
+.cal-day.hs-out{background:rgba(59,130,246,.25);}
+.hs-badge.o-va{top:2px;bottom:auto;background:#3B82F6;}
+.hs-badge.o-hs{top:2px;bottom:auto;background:#EF4444;}
+.out-sec{border-color:#3B82F6;}
+.out-sel{flex:1;padding:8px;border-radius:8px;border:2px solid var(--border);background:var(--card);color:var(--text);font-size:13px;font-weight:700;}
 </style>
 </head>
 <body>
@@ -266,6 +273,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 <!-- APP -->
 <div class="app-wrap" id="appWrap">
   <div class="hs-bar" id="hsBar" onclick="hsEditBase()"><span id="hsTotal">⏱️ Heures sup : 0h00</span><span class="hs-sub" id="hsSub"></span></div>
+  <div class="hs-bar va-bar" id="vaBar" onclick="vaEdit()"><span id="vaTotal">🏖️ Congés (VA) : 0h00</span><span class="hs-sub" id="vaSub"></span></div>
   <div class="topbar">
     <div class="topbar-left">
       <div class="topbar-avatar" id="topAvatar">E</div>
@@ -472,6 +480,11 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
     <div class="hs-sec"><div class="hs-sec-title">⏱️ Heures supplémentaires ce jour</div>
       <div class="hs-row"><input type="number" id="hsH" min="0" max="24" placeholder="0" inputmode="numeric"><span>h</span><input type="number" id="hsM" min="0" max="59" placeholder="00" inputmode="numeric"><span>min</span>
       <button class="hs-btn" onclick="hsSaveDay()">Enregistrer</button><button class="hs-btn del" id="hsDel" onclick="hsRemoveDay()" style="display:none">Retirer</button></div></div>
+    <div class="hs-sec out-sec"><div class="hs-sec-title">🏖️ Congé / départ anticipé ce jour</div>
+      <div class="hs-row"><input type="number" id="outH" min="0" max="24" placeholder="0" inputmode="numeric"><span>h</span><input type="number" id="outM" min="0" max="59" placeholder="00" inputmode="numeric"><span>min</span>
+      <button class="hs-btn" style="background:#6B7280" onclick="outFull()">Journée entière</button></div>
+      <div class="hs-row" style="margin-top:8px"><select id="outSrc" class="out-sel"><option value="va">Décompter des congés (VA)</option><option value="hs">Décompter des heures sup</option></select></div>
+      <div class="hs-row" style="margin-top:8px"><button class="hs-btn" style="background:#3B82F6" onclick="outSave()">Enregistrer</button><button class="hs-btn del" id="outDel" onclick="outRemove()" style="display:none">Retirer</button></div></div>
     <button class="btn-add-day" onclick="addEventForDay()">+ Ajouter un événement</button>
     <button class="btn-close-day" onclick="closeDayModal()">Fermer</button>
   </div>
@@ -790,16 +803,24 @@ function addEventForDay(){closeDayModal();openAddModal(selectedDay);}
 // ===== Heures supplémentaires =====
 function hsKey(){return 'hs_'+((currentUser&&(currentUser.id||currentUser.email))||'x');}
 let hsCache=null,hsReady=false;
-function hsReadLocal(){try{const d=JSON.parse(localStorage.getItem(hsKey())||'{}');return{base:d.base||0,days:d.days||{}};}catch(e){return{base:0,days:{}};}}
+function vaNorm(v){v=v||{};return{base:v.base||0,dayMin:v.dayMin||456,out:v.out||{}};}
+function hsReadLocal(){try{const d=JSON.parse(localStorage.getItem(hsKey())||'{}');return{base:d.base||0,days:d.days||{},va:vaNorm(d.va)};}catch(e){return{base:0,days:{},va:vaNorm()};}}
 function hsLoad(){if(!hsCache)hsCache=hsReadLocal();return hsCache;}
 function hsStore(d){hsCache=d;try{localStorage.setItem(hsKey(),JSON.stringify(d));}catch(e){}if(hsReady)hsPush(d);}
-async function hsPush(d){try{await fetch('/api/overtime',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',user_id:String(currentUser.id),base:d.base,days:d.days})});}catch(e){}}
-async function hsSync(){hsCache=null;hsReady=false;try{const res=await fetch('/api/overtime',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'get',user_id:String(currentUser.id)})});if(!res.ok)throw new Error('overtime api');const srv=await res.json();const local=hsReadLocal();const localHas=local.base!==0||Object.keys(local.days).length>0;if(srv&&srv.exists){hsCache={base:srv.base||0,days:srv.days||{}};try{localStorage.setItem(hsKey(),JSON.stringify(hsCache));}catch(e){}}else if(localHas){hsCache=local;await hsPush(local);}hsReady=true;}catch(e){hsReady=false;}hsRender();renderAll();}
+async function hsPush(d){try{await fetch('/api/overtime',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',user_id:String(currentUser.id),base:d.base,days:d.days,va:d.va})});}catch(e){}}
+async function hsSync(){hsCache=null;hsReady=false;try{const res=await fetch('/api/overtime',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'get',user_id:String(currentUser.id)})});if(!res.ok)throw new Error('overtime api');const srv=await res.json();const local=hsReadLocal();const localHas=local.base!==0||Object.keys(local.days).length>0||local.va.base!==0||Object.keys(local.va.out).length>0;if(srv&&srv.exists){hsCache={base:srv.base||0,days:srv.days||{},va:vaNorm(srv.va)};try{localStorage.setItem(hsKey(),JSON.stringify(hsCache));}catch(e){}}else if(localHas){hsCache=local;await hsPush(local);}hsReady=true;}catch(e){hsReady=false;}hsRender();renderAll();}
 function hsFmt(min){const s=min<0?'-':'';min=Math.abs(Math.round(min));return s+Math.floor(min/60)+'h'+String(min%60).padStart(2,'0');}
-function hsRender(){const d=hsLoad();let sum=0,month=0;const pre=curYear+'-'+String(curMonth+1).padStart(2,'0');Object.keys(d.days).forEach(k=>{sum+=d.days[k];if(k.startsWith(pre))month+=d.days[k];});const el=document.getElementById('hsTotal');if(el)el.textContent='⏱️ Heures sup : '+hsFmt(d.base+sum);const sb=document.getElementById('hsSub');if(sb)sb.textContent='Ce mois : +'+hsFmt(month)+' · Touchez pour le solde de départ';}
+function hsRender(){const d=hsLoad();let sum=0,month=0;const pre=curYear+'-'+String(curMonth+1).padStart(2,'0');Object.keys(d.days).forEach(k=>{sum+=d.days[k];if(k.startsWith(pre))month+=d.days[k];});Object.keys(d.va.out).forEach(k=>{const o=d.va.out[k];if(o.src==='hs'){sum-=o.min;if(k.startsWith(pre))month-=o.min;}});const el=document.getElementById('hsTotal');if(el)el.textContent='⏱️ Heures sup : '+hsFmt(d.base+sum);const sb=document.getElementById('hsSub');if(sb)sb.textContent='Ce mois : '+(month>0?'+':'')+hsFmt(month)+' · Touchez pour le solde de départ';vaRender();}
+function vaRender(){const d=hsLoad();let used=0,month=0;const pre=curYear+'-'+String(curMonth+1).padStart(2,'0');Object.keys(d.va.out).forEach(k=>{const o=d.va.out[k];if(o.src==='va'){used+=o.min;if(k.startsWith(pre))month+=o.min;}});const bal=d.va.base-used;const el=document.getElementById('vaTotal');if(el)el.textContent='🏖️ Congés (VA) : '+hsFmt(bal)+' (≈ '+(bal/d.va.dayMin).toFixed(1).replace('.',',')+' j)';const sb=document.getElementById('vaSub');if(sb)sb.textContent='Ce mois : -'+hsFmt(month)+' · Touchez pour régler';}
+function hsParse(v){const m=String(v).trim().match(/^(-?\d+)\s*[h:]?\s*(\d{0,2})$/i);if(!m)return null;const neg=m[1].startsWith('-');return(neg?-1:1)*(Math.abs(parseInt(m[1]))*60+(m[2]?parseInt(m[2].padEnd(2,'0')):0));}
+function vaEdit(){const d=hsLoad();const v=prompt('Solde de départ des congés VA en heures (ex : 96h00)',hsFmt(d.va.base));if(v===null)return;const b=hsParse(v);if(b===null){alert('Format non reconnu. Exemple : 96h00');return;}d.va.base=b;const j=prompt('Durée d\'une journée de travail (ex : 7h36)',hsFmt(d.va.dayMin));if(j!==null){const dm=hsParse(j);if(dm&&dm>0)d.va.dayMin=dm;}hsStore(d);hsRender();}
+function outFull(){const m=hsLoad().va.dayMin;document.getElementById('outH').value=Math.floor(m/60);document.getElementById('outM').value=m%60;}
+function outFillDay(ds){const o=hsLoad().va.out[ds];document.getElementById('outH').value=o?Math.floor(o.min/60):'';document.getElementById('outM').value=o?o.min%60:'';document.getElementById('outSrc').value=o?o.src:'va';document.getElementById('outDel').style.display=o?'inline-block':'none';}
+function outSave(){const h=parseInt(document.getElementById('outH').value)||0,m=parseInt(document.getElementById('outM').value)||0;const tot=h*60+m;const d=hsLoad();if(tot>0)d.va.out[selectedDay]={min:tot,src:document.getElementById('outSrc').value};else delete d.va.out[selectedDay];hsStore(d);hsRender();renderAll();outFillDay(selectedDay);}
+function outRemove(){const d=hsLoad();delete d.va.out[selectedDay];hsStore(d);hsRender();renderAll();outFillDay(selectedDay);}
 function hsEditBase(){const d=hsLoad();const v=prompt('Solde de départ des heures sup (ex : 42h36)',hsFmt(d.base));if(v===null)return;const m=v.trim().match(/^(-?\d+)\s*[h:]?\s*(\d{0,2})$/i);if(!m){alert('Format non reconnu. Exemple : 42h36');return;}const neg=m[1].startsWith('-');const h=Math.abs(parseInt(m[1]));const mi=m[2]?parseInt(m[2].padEnd(2,'0')):0;d.base=(neg?-1:1)*(h*60+mi);hsStore(d);hsRender();}
-function hsDecorate(cell,ds){const v=hsLoad().days[ds];if(v>0){cell.classList.add('hs-on');const b=document.createElement('div');b.className='hs-badge';b.textContent='+'+hsFmt(v);cell.appendChild(b);}}
-function hsFillDay(ds){const v=hsLoad().days[ds]||0;document.getElementById('hsH').value=v?Math.floor(v/60):'';document.getElementById('hsM').value=v?v%60:'';document.getElementById('hsDel').style.display=v?'inline-block':'none';}
+function hsDecorate(cell,ds){const d=hsLoad();const v=d.days[ds];if(v>0){cell.classList.add('hs-on');const b=document.createElement('div');b.className='hs-badge';b.textContent='+'+hsFmt(v);cell.appendChild(b);}const o=d.va.out[ds];if(o){cell.classList.add('hs-out');const b=document.createElement('div');b.className='hs-badge o-'+o.src;b.textContent='-'+hsFmt(o.min)+(o.src==='va'?' VA':' HS');cell.appendChild(b);}}
+function hsFillDay(ds){const v=hsLoad().days[ds]||0;document.getElementById('hsH').value=v?Math.floor(v/60):'';document.getElementById('hsM').value=v?v%60:'';document.getElementById('hsDel').style.display=v?'inline-block':'none';outFillDay(ds);}
 function hsSaveDay(){const h=parseInt(document.getElementById('hsH').value)||0,m=parseInt(document.getElementById('hsM').value)||0;const tot=h*60+m;const d=hsLoad();if(tot>0)d.days[selectedDay]=tot;else delete d.days[selectedDay];hsStore(d);hsRender();renderAll();hsFillDay(selectedDay);}
 function hsRemoveDay(){const d=hsLoad();delete d.days[selectedDay];hsStore(d);hsRender();renderAll();hsFillDay(selectedDay);}
 </script>
