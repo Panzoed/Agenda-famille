@@ -803,7 +803,7 @@ function addEventForDay(){closeDayModal();openAddModal(selectedDay);}
 // ===== Heures supplémentaires =====
 function hsKey(){return 'hs_'+((currentUser&&(currentUser.id||currentUser.email))||'x');}
 let hsCache=null,hsReady=false;
-function vaNorm(v){v=v||{};return{base:v.base||0,dayMin:v.dayMin||456,out:v.out||{}};}
+function vaNorm(v){v=v||{};return{base:v.base||0,dayMin:v.dayMin||480,out:v.out||{}};}
 function hsReadLocal(){try{const d=JSON.parse(localStorage.getItem(hsKey())||'{}');return{base:d.base||0,days:d.days||{},va:vaNorm(d.va)};}catch(e){return{base:0,days:{},va:vaNorm()};}}
 function hsLoad(){if(!hsCache)hsCache=hsReadLocal();return hsCache;}
 function hsStore(d){hsCache=d;try{localStorage.setItem(hsKey(),JSON.stringify(d));}catch(e){}if(hsReady)hsPush(d);}
